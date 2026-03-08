@@ -13,6 +13,9 @@ param foundryPrincipalId string
 param functionAppPrincipalId string
 param deployerObjectId string
 
+@description('GitHub Actions Service Principal Object ID for OIDC deployment')
+param githubActionsPrincipalId string = ''
+
 // ---------------------------------------------------------------------------
 // Well-Known Role Definition IDs
 // ---------------------------------------------------------------------------
@@ -103,6 +106,20 @@ resource deployerStorageRole 'Microsoft.Authorization/roleAssignments@2022-04-01
     roleDefinitionId: roles.storageBlobContributor
     principalId: deployerObjectId
     principalType: 'User'
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GitHub Actions → Storage Blob Contributor (for deployment uploads)
+// ---------------------------------------------------------------------------
+
+resource githubActionsStorageRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(githubActionsPrincipalId)) {
+  name: guid(storageAccountId, githubActionsPrincipalId, 'StorageBlobContributor-github')
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: roles.storageBlobContributor
+    principalId: githubActionsPrincipalId
+    principalType: 'ServicePrincipal'
   }
 }
 

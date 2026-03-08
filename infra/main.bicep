@@ -41,6 +41,9 @@ param fallbackModelCapacity int = 30
 @description('Deployer AAD Object ID for RBAC')
 param deployerObjectId string
 
+@description('GitHub Actions Service Principal Object ID for CI/CD')
+param githubActionsPrincipalId string = ''
+
 @description('Enable public network access')
 param enablePublicAccess bool = true
 
@@ -182,6 +185,7 @@ module rbac 'modules/role-assignments.bicep' = {
     foundryPrincipalId: foundry.outputs.principalId
     functionAppPrincipalId: functionApp.outputs.functionAppPrincipalId
     deployerObjectId: deployerObjectId
+    githubActionsPrincipalId: githubActionsPrincipalId
   }
 }
 
