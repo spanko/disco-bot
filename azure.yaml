@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+requiredVersions:
+    extensions:
+        azure.ai.agents: latest
+name: discovery-chatbot
+metadata:
+    template: custom
+services:
+    DiscoveryFunctions:
+        project: src/DiscoveryAgent
+        host: function
+        language: csharp
+        deployments:
+            - model:
+                format: OpenAI
+                name: gpt-5.2-chat
+                version: "2025-12-11"
+              name: gpt-5.2-chat
+              sku:
+                capacity: 20
+                name: GlobalStandard
+            - model:
+                format: OpenAI
+                name: gpt-4o-mini
+                version: "2024-07-18"
+              name: gpt-4o-mini
+              sku:
+                capacity: 10
+                name: GlobalStandard
+infra:
+    provider: bicep
+    path: ./infra
+    module: main

@@ -1,0 +1,80 @@
+# =============================================================================
+# Discovery Bot - Agent Definition
+# This file is the primary configurable artifact. Swap this file (along with
+# instructions.md) to repurpose the entire solution for a different use case.
+# =============================================================================
+
+template:
+  kind: hosted
+
+name: discovery-bot
+description: >
+  Conversational discovery agent that helps organizations gather, organize,
+  and synthesize knowledge through adaptive natural conversation.
+
+model:
+  deployment: gpt-5.2
+  fallback: gpt-4.1-mini
+
+instructions_file: ./instructions.md
+
+# Agent capabilities
+tools:
+  # Built-in: File Search (RAG over uploaded documents)
+  - type: file_search
+    description: Search uploaded documents for relevant context
+
+  # Custom: Knowledge extraction from conversation
+  - type: function
+    name: extract_knowledge
+    description: >
+      Extract and categorize knowledge items from user responses.
+      Categories: fact, opinion, decision, requirement, concern.
+
+  # Custom: User profile storage
+  - type: function
+    name: store_user_profile
+    description: >
+      Store or update the user's role profile for adaptive behavior.
+
+  # Custom: Questionnaire section tracking
+  - type: function
+    name: complete_questionnaire_section
+    description: >
+      Mark a questionnaire section as complete with summary.
+
+# Knowledge sources (Foundry IQ)
+knowledge:
+  sources:
+    - type: azure_ai_search
+      index: knowledge-items
+      description: Previously captured knowledge with attribution
+    - type: file_upload
+      container: uploads
+      description: User-uploaded documents
+
+# Memory configuration
+memory:
+  enabled: true
+  topics:
+    - user_preferences
+    - discovered_knowledge
+    - session_context
+    - questionnaire_progress
+
+# Content safety
+safety:
+  content_filter: default
+  blocked_categories: []
+
+# Deployment channels
+channels:
+  - type: web
+    path: /api/conversation
+  - type: teams
+    publish: true
+    scopes:
+      - personal
+      - team
+      - groupchat
+    supports_files: true

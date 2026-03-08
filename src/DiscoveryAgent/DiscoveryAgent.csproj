@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>DiscoveryAgent</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <UserSecretsId>9fd313fe-2eae-4d11-af26-eab00b04ec51</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Azure Functions -->
+    <PackageReference Include="Azure.AI.OpenAI" Version="2.*" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.*" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.*" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="2.*" />
+
+    <!-- Microsoft Foundry / Agent Framework SDK -->
+    <PackageReference Include="Azure.AI.Projects" Version="2.0.0-beta.1" />
+    <PackageReference Include="Azure.AI.Agents.Persistent" Version="1.2.0-beta.9" />
+    <PackageReference Include="Azure.Identity" Version="1.*" />
+
+    <!-- Azure Services -->
+    <PackageReference Include="Azure.Search.Documents" Version="11.*" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.*" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.*" />
+    <PackageReference Include="Azure.AI.DocumentIntelligence" Version="1.*" />
+    <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.*" />
+
+    <!-- Observability -->
+    <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging.ApplicationInsights" Version="2.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.*" />
+
+    <!-- Utilities -->
+    <PackageReference Include="System.Text.Json" Version="10.*" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Copy config folder to output directory -->
+    <None Include="..\..\config\**\*" Link="config\%(RecursiveDir)%(Filename)%(Extension)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

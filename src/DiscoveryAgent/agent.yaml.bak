@@ -1,0 +1,7 @@
+template:
+  kind: hosted
+name: discovery-bot
+description: Discovery chatbot
+agent:
+  model: gpt-5.2-chat
+  instructions: You are a helpful assistant
