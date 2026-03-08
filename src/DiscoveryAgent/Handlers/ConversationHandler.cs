@@ -143,9 +143,23 @@ public class ConversationHandler
         {
             messagesList.Add(msg);
         }
+
+        _logger.LogInformation("Retrieved {Count} messages from thread {ThreadId}", messagesList.Count, threadId);
+        foreach (var msg in messagesList.OrderByDescending(m => m.CreatedAt).Take(5))
+        {
+            _logger.LogInformation("Message: Role={Role}, ContentItemCount={Count}, CreatedAt={CreatedAt}",
+                msg.Role, msg.ContentItems.Count, msg.CreatedAt);
+        }
+
         var lastAssistantMessage = messagesList
             .OrderByDescending(m => m.CreatedAt)
             .FirstOrDefault(m => m.Role == MessageRole.Agent);
+
+        if (lastAssistantMessage == null)
+        {
+            _logger.LogWarning("No agent-role message found in thread {ThreadId}. Run status was {Status}",
+                threadId, run.Value.Status);
+        }
 
         var responseText = lastAssistantMessage?.ContentItems
             .OfType<MessageTextContent>()

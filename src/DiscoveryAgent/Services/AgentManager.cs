@@ -84,10 +84,13 @@ public class AgentManager
         // Try reading from file system (works in container)
         if (File.Exists(path))
         {
-            return await File.ReadAllTextAsync(path);
+            var instructions = await File.ReadAllTextAsync(path);
+            _logger.LogInformation("Loaded instructions from file: {Path} ({Length} characters)", path, instructions.Length);
+            return instructions;
         }
 
         // Fallback: embedded default prompt
+        _logger.LogWarning("Instructions file not found at {Path}, using default prompt", path);
         return GetDefaultSystemPrompt();
     }
 
