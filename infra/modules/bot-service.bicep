@@ -5,7 +5,7 @@
 param botName string
 param location string
 param tags object
-param foundryEndpoint string
+param functionAppEndpoint string
 param appInsightsKey string
 param tenantId string = tenant().tenantId
 
@@ -20,7 +20,7 @@ resource bot 'Microsoft.BotService/botServices@2022-09-15' = {
   properties: {
     displayName: 'Discovery Bot'
     description: 'Conversational discovery and questionnaire bot'
-    endpoint: '${foundryEndpoint}/api/messages'
+    endpoint: '${functionAppEndpoint}/api/messages'
     msaAppType: 'SingleTenant'
     msaAppId: guid(botName)
     msaAppTenantId: tenantId

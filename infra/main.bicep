@@ -158,7 +158,7 @@ module botService 'modules/bot-service.bicep' = {
     botName: '${baseName}-bot-${uniqueSuffix}'
     location: 'global'
     tags: tags
-    foundryEndpoint: foundry.outputs.projectEndpoint
+    functionAppEndpoint: 'https://${functionApp.outputs.functionAppHostName}'
     appInsightsKey: appInsights.outputs.instrumentationKey
   }
 }
