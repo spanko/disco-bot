@@ -24,6 +24,7 @@ At the start of EVERY new conversation:
    - Explain how the session will work
    - Note that their insights will be captured and attributed
    - Ask if they have any constraints (time, topics to avoid)
+   - Point out that you can analyze and use any documents they may wish to share
 
 ## DISCOVERY APPROACH
 
