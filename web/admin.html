@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discovery Bot Admin</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>Discovery Bot</h1>
+                <p>Admin Portal</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="contexts">
+                    <span class="icon">📋</span>
+                    <span>Discovery Contexts</span>
+                </a>
+                <a href="#" class="nav-item" data-section="instructions">
+                    <span class="icon">📝</span>
+                    <span>Agent Instructions</span>
+                </a>
+                <a href="#" class="nav-item" data-section="questionnaires">
+                    <span class="icon">📄</span>
+                    <span>Questionnaires</span>
+                </a>
+                <a href="#" class="nav-item" data-section="knowledge">
+                    <span class="icon">🧠</span>
+                    <span>Knowledge Base</span>
+                </a>
+                <a href="#" class="nav-item" data-section="orgchart">
+                    <span class="icon">👥</span>
+                    <span>Org Chart & Roles</span>
+                </a>
+                <a href="#" class="nav-item" data-section="instances">
+                    <span class="icon">🤖</span>
+                    <span>Bot Instances</span>
+                </a>
+                <a href="#" class="nav-item" data-section="analytics">
+                    <span class="icon">📊</span>
+                    <span>Analytics</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-header">
+                <h2 id="sectionTitle">Discovery Contexts</h2>
+                <div class="header-actions">
+                    <button id="primaryAction" class="btn btn-primary">
+                        <span class="icon">➕</span> New Context
+                    </button>
+                </div>
+            </div>
+
+            <!-- Discovery Contexts Section -->
+            <section id="contexts-section" class="content-section active">
+                <div class="section-controls">
+                    <input type="search" id="contextSearch" placeholder="Search contexts..." class="search-input">
+                    <select id="contextFilter" class="filter-select">
+                        <option value="all">All Contexts</option>
+                        <option value="active">Active</option>
+                        <option value="archived">Archived</option>
+                    </select>
+                </div>
+
+                <div id="contextsGrid" class="grid-container">
+                    <div class="loading-state">Loading contexts...</div>
+                </div>
+
+                <!-- Context Editor Modal -->
+                <div id="contextModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="contextModalTitle">New Discovery Context</h3>
+                            <button class="modal-close">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="contextForm">
+                                <input type="hidden" id="contextId">
+                                <div class="form-group">
+                                    <label for="contextName">Context Name</label>
+                                    <input type="text" id="contextName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contextDescription">Description</label>
+                                    <textarea id="contextDescription" rows="3"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="discoveryMode">Discovery Mode</label>
+                                    <select id="discoveryMode">
+                                        <option value="open">Open Discovery</option>
+                                        <option value="guided">Guided Discovery</option>
+                                        <option value="questionnaire">Questionnaire-Based</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="discoveryAreas">Discovery Areas (one per line)</label>
+                                    <textarea id="discoveryAreas" rows="4" placeholder="Sales Process&#10;Customer Needs&#10;Technical Requirements"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="keyQuestions">Key Questions (one per line)</label>
+                                    <textarea id="keyQuestions" rows="4"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="agentInstructions">Custom Agent Instructions</label>
+                                    <textarea id="agentInstructions" rows="6" placeholder="Additional instructions specific to this context..."></textarea>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="cancelContext">Cancel</button>
+                            <button class="btn btn-primary" id="saveContext">Save Context</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Agent Instructions Section -->
+            <section id="instructions-section" class="content-section">
+                <div class="editor-toolbar">
+                    <button class="btn btn-secondary" id="reloadInstructions">
+                        <span class="icon">🔄</span> Reload
+                    </button>
+                    <button class="btn btn-primary" id="saveInstructions">
+                        <span class="icon">💾</span> Save Instructions
+                    </button>
+                </div>
+                <div class="editor-container">
+                    <textarea id="instructionsEditor" class="code-editor" spellcheck="false"></textarea>
+                </div>
+                <div class="editor-info">
+                    <small>Editing: config/instructions.md | Changes take effect immediately for new conversations</small>
+                </div>
+            </section>
+
+            <!-- Questionnaires Section -->
+            <section id="questionnaires-section" class="content-section">
+                <div class="section-controls">
+                    <input type="search" id="questionnaireSearch" placeholder="Search questionnaires..." class="search-input">
+                    <div class="upload-area" id="questionnaireUpload">
+                        <p>Drop questionnaire files here or click to upload</p>
+                        <input type="file" id="questionnaireFileInput" accept=".pdf,.docx,.xlsx,.csv" multiple hidden>
+                        <small>Supports PDF, DOCX, XLSX, CSV</small>
+                    </div>
+                </div>
+                <div id="questionnairesGrid" class="grid-container">
+                    <div class="loading-state">Loading questionnaires...</div>
+                </div>
+            </section>
+
+            <!-- Knowledge Base Section -->
+            <section id="knowledge-section" class="content-section">
+                <div class="section-controls">
+                    <input type="search" id="knowledgeSearch" placeholder="Search knowledge items..." class="search-input">
+                    <select id="knowledgeFilter" class="filter-select">
+                        <option value="all">All Items</option>
+                        <option value="Fact">Facts</option>
+                        <option value="Opinion">Opinions</option>
+                        <option value="Decision">Decisions</option>
+                        <option value="Requirement">Requirements</option>
+                        <option value="Concern">Concerns</option>
+                    </select>
+                    <select id="knowledgeContext" class="filter-select">
+                        <option value="">All Contexts</option>
+                    </select>
+                </div>
+                <div id="knowledgeGrid" class="grid-container">
+                    <div class="loading-state">Loading knowledge items...</div>
+                </div>
+            </section>
+
+            <!-- Org Chart Section -->
+            <section id="orgchart-section" class="content-section">
+                <div class="section-controls">
+                    <div class="upload-area" id="orgchartUpload">
+                        <p>Drop org chart file here or click to upload</p>
+                        <input type="file" id="orgchartFileInput" accept=".xlsx,.csv" hidden>
+                        <small>Excel or CSV with columns: Name, Email, Title, Department, Manager</small>
+                    </div>
+                </div>
+                <div class="org-chart-viewer">
+                    <div class="section-header">
+                        <h3>Organization Structure</h3>
+                        <button class="btn btn-secondary" id="exportOrgChart">Export</button>
+                    </div>
+                    <div id="orgChartTree" class="tree-view">
+                        <div class="loading-state">No org chart data loaded</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bot Instances Section -->
+            <section id="instances-section" class="content-section">
+                <div class="instances-overview">
+                    <div class="stat-card">
+                        <h3>Active Instances</h3>
+                        <div class="stat-value" id="activeInstances">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Conversations</h3>
+                        <div class="stat-value" id="totalConversations">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Knowledge Items</h3>
+                        <div class="stat-value" id="totalKnowledge">0</div>
+                    </div>
+                </div>
+                <div id="instancesGrid" class="grid-container">
+                    <div class="info-state">
+                        <p>Multi-instance management coming soon</p>
+                        <p><small>Current deployment: <strong>discdev-func-3xr5ve</strong></small></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section id="analytics-section" class="content-section">
+                <div class="analytics-dashboard">
+                    <h3>Usage Analytics</h3>
+                    <p class="info-text">Analytics dashboard coming soon</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

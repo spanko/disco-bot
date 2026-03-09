@@ -57,6 +57,7 @@ var host = new HostBuilder()
         services.AddSingleton<KnowledgeStore>();
         services.AddSingleton<QuestionnaireProcessor>();
         services.AddSingleton<UserProfileService>();
+        services.AddSingleton<ContextManagementService>();
 
         services.AddScoped<ConversationHandler>();
         services.AddScoped<FileUploadHandler>();
