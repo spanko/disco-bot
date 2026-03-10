@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'src/**'
+      - 'web/**'
       - 'config/**'
       - 'infra/**'
       - '.github/workflows/deploy-function.yml'
@@ -42,6 +43,11 @@ jobs:
 
     - name: Publish project
       run: dotnet publish ${{ env.FUNCTION_APP_PATH }} --configuration Release --no-build --output ./publish
+
+    - name: Copy web files and config to publish directory
+      run: |
+        cp -r ./web ./publish/
+        cp -r ./config ./publish/
 
     - name: Create deployment package
       run: |
