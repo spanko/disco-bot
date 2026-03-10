@@ -29,35 +29,36 @@ public class StaticFilesFunction
         _logger = logger;
     }
 
-    [Function("ServeStaticFile")]
-    public async Task<HttpResponseData> ServeFile(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "{*filePath}")] HttpRequestData req,
-        string filePath)
+    [Function("ServeRootFile")]
+    public async Task<HttpResponseData> ServeRootFile(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "{fileName}")] HttpRequestData req,
+        string fileName)
     {
         try
         {
-            // Default to index.html if no path specified
-            if (string.IsNullOrEmpty(filePath) || filePath == "/")
-            {
-                filePath = "index.html";
-            }
+            var filePath = fileName;
 
-            // Remove leading slash if present
-            filePath = filePath.TrimStart('/');
+            // Only allow specific file extensions
+            var allowedExtensions = new[] { ".html", ".css", ".js", ".json", ".png", ".jpg", ".jpeg", ".svg", ".ico" };
+            var extension = Path.GetExtension(filePath).ToLowerInvariant();
 
-            // Only serve files from the web directory
-            if (!filePath.StartsWith("web/") && !filePath.StartsWith("api/"))
+            if (!allowedExtensions.Contains(extension))
             {
-                filePath = $"web/{filePath}";
+                var badRequest = req.CreateResponse(HttpStatusCode.BadRequest);
+                await badRequest.WriteStringAsync("File type not allowed");
+                return badRequest;
             }
 
             // Prevent directory traversal attacks
-            if (filePath.Contains("..") || filePath.Contains("://"))
+            if (fileName.Contains("..") || fileName.Contains("/") || fileName.Contains("\\"))
             {
                 var badRequest = req.CreateResponse(HttpStatusCode.BadRequest);
-                await badRequest.WriteStringAsync("Invalid file path");
+                await badRequest.WriteStringAsync("Invalid file name");
                 return badRequest;
             }
+
+            // Serve from web directory
+            filePath = $"web/{fileName}";
 
             // Get the base directory (where the function app is running)
             var baseDirectory = AppContext.BaseDirectory;
@@ -73,7 +74,6 @@ public class StaticFilesFunction
                 return notFound;
             }
 
-            var extension = Path.GetExtension(fullPath).ToLowerInvariant();
             var contentType = ContentTypes.GetValueOrDefault(extension, "application/octet-stream");
 
             var response = req.CreateResponse(HttpStatusCode.OK);
@@ -92,7 +92,7 @@ public class StaticFilesFunction
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error serving static file: {FilePath}", filePath);
+            _logger.LogError(ex, "Error serving static file: {FileName}", fileName);
             var errorResponse = req.CreateResponse(HttpStatusCode.InternalServerError);
             await errorResponse.WriteStringAsync("Error serving file");
             return errorResponse;
