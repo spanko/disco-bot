@@ -31,7 +31,7 @@ public class StaticFilesFunction
 
     [Function("ServeRootFile")]
     public async Task<HttpResponseData> ServeRootFile(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "{fileName}")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "web/{fileName}")] HttpRequestData req,
         string fileName)
     {
         try
