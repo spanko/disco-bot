@@ -1,0 +1,22 @@
+{
+  "tables": [
+    {
+      "columns": [
+        {
+          "name": "timestamp",
+          "type": "datetime"
+        },
+        {
+          "name": "type",
+          "type": "string"
+        },
+        {
+          "name": "outerMessage",
+          "type": "string"
+        }
+      ],
+      "name": "PrimaryResult",
+      "rows": []
+    }
+  ]
+}

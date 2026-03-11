@@ -9,16 +9,13 @@ namespace DiscoveryAgent.Functions;
 
 public class AdminContextFunction
 {
-    private readonly AgentManager _manager;
     private readonly ContextManagementService _contextService;
     private readonly ILogger<AdminContextFunction> _logger;
 
     public AdminContextFunction(
-        AgentManager manager,
         ContextManagementService contextService,
         ILogger<AdminContextFunction> logger)
     {
-        _manager = manager;
         _contextService = contextService;
         _logger = logger;
     }

@@ -1,0 +1,327 @@
+{
+  "tables": [
+    {
+      "columns": [
+        {
+          "name": "timestamp",
+          "type": "datetime"
+        },
+        {
+          "name": "itemType",
+          "type": "string"
+        },
+        {
+          "name": "message",
+          "type": "string"
+        },
+        {
+          "name": "severityLevel",
+          "type": "int"
+        }
+      ],
+      "name": "PrimaryResult",
+      "rows": [
+        [
+          "2026-03-08T13:57:18.8838171Z",
+          "trace",
+          "Host lock lease acquired by instance ID '007aae37af811650ee54291e49583a41'.",
+          1
+        ],
+        [
+          "2026-03-08T13:56:21.6596109Z",
+          "trace",
+          "The 'AdminContext' function is in error: The specified route conflicts with one or more built in routes.",
+          3
+        ],
+        [
+          "2026-03-08T13:56:21.6574019Z",
+          "trace",
+          "Job host started",
+          1
+        ],
+        [
+          "2026-03-08T13:56:21.6573633Z",
+          "trace",
+          "Host started (33006ms)",
+          1
+        ],
+        [
+          "2026-03-08T13:56:21.6473885Z",
+          "trace",
+          "Host initialized (32987ms)",
+          1
+        ],
+        [
+          "2026-03-08T13:56:21.6084308Z",
+          "trace",
+          "Found the following functions:\nHost.Functions.Conversation\nHost.Functions.FileUpload\nHost.Functions.Health\nHost.Functions.Knowledge",
+          1
+        ],
+        [
+          "2026-03-08T13:56:21.3380908Z",
+          "trace",
+          "Generating 4 job function(s)",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.9828043Z",
+          "trace",
+          "5 functions loaded",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.8546919Z",
+          "trace",
+          "0 functions found (Custom)",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.5550872Z",
+          "trace",
+          "Reading functions metadata (Custom)",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.2998894Z",
+          "trace",
+          "n/a",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.2996724Z",
+          "trace",
+          "Content-Type: application/json",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.2996619Z",
+          "trace",
+          "Content-Length: 56",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.2996488Z",
+          "trace",
+          "Date: Sun, 08 Mar 2026 13:56:19 GMT",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.2996377Z",
+          "trace",
+          "X-Content-Type-Options: REDACTED",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.2996163Z",
+          "trace",
+          "Strict-Transport-Security: REDACTED",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.299606Z",
+          "trace",
+          "apim-request-id: REDACTED",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.299578Z",
+          "trace",
+          "Headers:",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.2994708Z",
+          "trace",
+          "n/a",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.2994464Z",
+          "trace",
+          "{\"error\":{\"code\":\"404\",\"message\": \"Resource not found\"}}",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.2994357Z",
+          "trace",
+          "Content:",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.2994056Z",
+          "trace",
+          "n/a",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.2992877Z",
+          "trace",
+          "ErrorCode: 404",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.2991826Z",
+          "trace",
+          "Status: 404 (Resource Not Found)",
+          1
+        ],
+        [
+          "2026-03-08T13:56:20.2364304Z",
+          "trace",
+          "Warning: Failed to initialize agent on startup: Resource not found",
+          1
+        ],
+        [
+          "2026-03-08T13:55:48.715603Z",
+          "trace",
+          "Loading functions metadata",
+          1
+        ],
+        [
+          "2026-03-08T13:55:48.6508838Z",
+          "trace",
+          "Starting Host (HostId=discdev-func-3xr5ve, InstanceId=8e991b5e-f016-499f-9767-bde7abea8a37, Version=4.1047.100.0, ProcessId=27, AppDomainId=1, InDebugMode=False, InDiagnosticMode=False, FunctionsExtensionVersion=~4)",
+          1
+        ],
+        [
+          "2026-03-08T13:55:48.2770297Z",
+          "trace",
+          "Host initialization: ConsecutiveErrors=0, StartupCount=1, OperationId=2ee2e68b-e0e5-42af-8106-650a2eb3ec75",
+          1
+        ],
+        [
+          "2026-03-08T13:55:48.2377309Z",
+          "trace",
+          "Initializing Host. OperationId: '2ee2e68b-e0e5-42af-8106-650a2eb3ec75'.",
+          1
+        ],
+        [
+          "2026-03-08T13:55:47.0868558Z",
+          "trace",
+          "Initializing Warmup Extension.",
+          1
+        ],
+        [
+          "2026-03-08T13:55:34.2483966Z",
+          "exception",
+          "",
+          3
+        ],
+        [
+          "2026-03-08T13:55:34.1300405Z",
+          "trace",
+          "Executed 'Functions.Health' (Failed, Id=5a462d0e-34b9-4840-a6f5-d525f0f7e965, Duration=6080ms)",
+          3
+        ],
+        [
+          "2026-03-08T13:55:34.1299589Z",
+          "exception",
+          "",
+          3
+        ],
+        [
+          "2026-03-08T13:55:33.5980793Z",
+          "trace",
+          "Function 'Health', Invocation id '5a462d0e-34b9-4840-a6f5-d525f0f7e965': An exception was thrown by the invocation.",
+          3
+        ],
+        [
+          "2026-03-08T13:55:33.5979689Z",
+          "exception",
+          "",
+          3
+        ],
+        [
+          "2026-03-08T13:55:28.1079284Z",
+          "trace",
+          "Executing 'Functions.Health' (Reason='This function was programmatically called via the host APIs.', Id=5a462d0e-34b9-4840-a6f5-d525f0f7e965)",
+          1
+        ],
+        [
+          "2026-03-08T13:52:22.5086516Z",
+          "exception",
+          "",
+          3
+        ],
+        [
+          "2026-03-08T13:52:22.5041132Z",
+          "trace",
+          "Executed 'Functions.Health' (Failed, Id=3796967a-e149-4485-b748-ca09a03d75d0, Duration=1776ms)",
+          3
+        ],
+        [
+          "2026-03-08T13:52:22.5037276Z",
+          "exception",
+          "",
+          3
+        ],
+        [
+          "2026-03-08T13:52:22.4821552Z",
+          "trace",
+          "Function 'Health', Invocation id '3796967a-e149-4485-b748-ca09a03d75d0': An exception was thrown by the invocation.",
+          3
+        ],
+        [
+          "2026-03-08T13:52:22.482105Z",
+          "exception",
+          "",
+          3
+        ],
+        [
+          "2026-03-08T13:52:20.737294Z",
+          "trace",
+          "Executing 'Functions.Health' (Reason='This function was programmatically called via the host APIs.', Id=3796967a-e149-4485-b748-ca09a03d75d0)",
+          1
+        ],
+        [
+          "2026-03-08T13:50:42.7628928Z",
+          "exception",
+          "",
+          3
+        ],
+        [
+          "2026-03-08T13:50:42.7525182Z",
+          "trace",
+          "Executed 'Functions.Health' (Failed, Id=258058f5-aaf6-40e6-936b-3b337a779655, Duration=168ms)",
+          3
+        ],
+        [
+          "2026-03-08T13:50:42.7524686Z",
+          "exception",
+          "",
+          3
+        ],
+        [
+          "2026-03-08T13:50:42.7247406Z",
+          "trace",
+          "Function 'Health', Invocation id '258058f5-aaf6-40e6-936b-3b337a779655': An exception was thrown by the invocation.",
+          3
+        ],
+        [
+          "2026-03-08T13:50:42.724699Z",
+          "exception",
+          "",
+          3
+        ],
+        [
+          "2026-03-08T13:50:42.5933618Z",
+          "trace",
+          "Executing 'Functions.Health' (Reason='This function was programmatically called via the host APIs.', Id=258058f5-aaf6-40e6-936b-3b337a779655)",
+          1
+        ],
+        [
+          "2026-03-08T13:50:35.205338Z",
+          "exception",
+          "",
+          3
+        ],
+        [
+          "2026-03-08T13:50:35.1759122Z",
+          "trace",
+          "Executed 'Functions.Health' (Failed, Id=4cacde5c-d9a2-44dc-b49f-babdb93d7474, Duration=1853ms)",
+          3
+        ]
+      ]
+    }
+  ]
+}

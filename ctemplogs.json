@@ -1,0 +1,147 @@
+{
+  "tables": [
+    {
+      "columns": [
+        {
+          "name": "timestamp",
+          "type": "datetime"
+        },
+        {
+          "name": "itemType",
+          "type": "string"
+        },
+        {
+          "name": "message",
+          "type": "string"
+        },
+        {
+          "name": "severityLevel",
+          "type": "int"
+        }
+      ],
+      "name": "PrimaryResult",
+      "rows": [
+        [
+          "2026-03-08T22:48:16.1979103Z",
+          "trace",
+          "Host lock lease acquired by instance ID '2c847a802c8040b33d7df73fac3a5061'.",
+          1
+        ],
+        [
+          "2026-03-08T22:47:25.4824451Z",
+          "trace",
+          "Executing 'Functions.Conversation' (Reason='This function was programmatically called via the host APIs.', Id=15e1d1b8-f640-4898-9a7e-81b72b990112)",
+          1
+        ],
+        [
+          "2026-03-08T22:47:18.0717576Z",
+          "trace",
+          "The 'AdminContext' function is in error: The specified route conflicts with one or more built in routes.",
+          3
+        ],
+        [
+          "2026-03-08T22:47:18.0454016Z",
+          "trace",
+          "Job host started",
+          1
+        ],
+        [
+          "2026-03-08T22:47:18.0453354Z",
+          "trace",
+          "Host started (36938ms)",
+          1
+        ],
+        [
+          "2026-03-08T22:47:17.99936Z",
+          "trace",
+          "Host initialized (36792ms)",
+          1
+        ],
+        [
+          "2026-03-08T22:47:17.049382Z",
+          "trace",
+          "Found the following functions:\nHost.Functions.Conversation\nHost.Functions.FileUpload\nHost.Functions.Health\nHost.Functions.Knowledge",
+          1
+        ],
+        [
+          "2026-03-08T22:47:14.5304161Z",
+          "trace",
+          "Executed 'Functions.Health' (Succeeded, Id=19e71c48-0e29-4083-bb77-cf28e3bbc6df, Duration=1890ms)",
+          1
+        ],
+        [
+          "2026-03-08T22:47:13.2836336Z",
+          "trace",
+          "Executing 'Functions.Health' (Reason='This function was programmatically called via the host APIs.', Id=19e71c48-0e29-4083-bb77-cf28e3bbc6df)",
+          1
+        ],
+        [
+          "2026-03-08T22:47:11.9380709Z",
+          "trace",
+          "Generating 4 job function(s)",
+          1
+        ],
+        [
+          "2026-03-08T22:47:10.730339Z",
+          "trace",
+          "5 functions loaded",
+          1
+        ],
+        [
+          "2026-03-08T22:47:10.6188564Z",
+          "trace",
+          "0 functions found (Custom)",
+          1
+        ],
+        [
+          "2026-03-08T22:47:10.1711375Z",
+          "trace",
+          "Reading functions metadata (Custom)",
+          1
+        ],
+        [
+          "2026-03-08T22:46:41.1303838Z",
+          "trace",
+          "Loading functions metadata",
+          1
+        ],
+        [
+          "2026-03-08T22:46:41.1057922Z",
+          "trace",
+          "Starting Host (HostId=discdev-func-3xr5ve, InstanceId=d36ed8dd-5d55-4348-8086-e598722270c8, Version=4.1047.100.0, ProcessId=28, AppDomainId=1, InDebugMode=False, InDiagnosticMode=False, FunctionsExtensionVersion=~4)",
+          1
+        ],
+        [
+          "2026-03-08T22:46:40.9914188Z",
+          "trace",
+          "Host initialization: ConsecutiveErrors=0, StartupCount=1, OperationId=a9f3ef61-2c0b-4a46-b50c-c2aa7ffe05d8",
+          1
+        ],
+        [
+          "2026-03-08T22:46:40.981465Z",
+          "trace",
+          "Initializing Host. OperationId: 'a9f3ef61-2c0b-4a46-b50c-c2aa7ffe05d8'.",
+          1
+        ],
+        [
+          "2026-03-08T22:46:40.7556874Z",
+          "trace",
+          "Initializing Warmup Extension.",
+          1
+        ],
+        [
+          "2026-03-08T22:46:35.2067431Z",
+          "trace",
+          "Executed 'Functions.Health' (Succeeded, Id=af122324-401c-4371-a2e8-7ad54a847a0f, Duration=1073ms)",
+          1
+        ],
+        [
+          "2026-03-08T22:46:34.147295Z",
+          "trace",
+          "Executing 'Functions.Health' (Reason='This function was programmatically called via the host APIs.', Id=af122324-401c-4371-a2e8-7ad54a847a0f)",
+          1
+        ]
+      ]
+    }
+  ]
+}

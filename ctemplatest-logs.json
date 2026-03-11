@@ -1,0 +1,30 @@
+{
+  "tables": [
+    {
+      "columns": [
+        {
+          "name": "timestamp",
+          "type": "datetime"
+        },
+        {
+          "name": "itemType",
+          "type": "string"
+        },
+        {
+          "name": "message",
+          "type": "string"
+        },
+        {
+          "name": "severityLevel",
+          "type": "int"
+        },
+        {
+          "name": "outerMessage",
+          "type": "string"
+        }
+      ],
+      "name": "PrimaryResult",
+      "rows": []
+    }
+  ]
+}
