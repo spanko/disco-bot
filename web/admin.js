@@ -1,7 +1,7 @@
 // Configuration
 // Use direct Function App URLs with API key for admin endpoints that require authentication
 const API_BASE = window.API_ENDPOINT || 'https://discdev-func-3xr5ve.azurewebsites.net';
-const API_KEY = window.API_KEY || 'pgA3mK7ono-cL9-IbQtLeLLWxfQa-UegTwIpjsgo7Z-vAzFuKKQSAw==';
+const API_KEY = window.API_KEY || 'QCuEUGIB51YmmbNrLSEch_uFCyA-PAQ8oFiOiY1icHsjAzFuTwz7ZA==';
 
 // Global state
 let currentContexts = [];
