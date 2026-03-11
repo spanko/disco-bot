@@ -16,11 +16,11 @@ public class AdminInstructionsFunction
     }
 
     /// <summary>
-    /// GET /api/admin/instructions - Get instructions.md content
+    /// GET /api/manage/instructions - Get instructions.md content
     /// </summary>
     [Function("AdminInstructionsGet")]
     public async Task<HttpResponseData> GetInstructions(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "admin/instructions")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "manage/instructions")] HttpRequestData req)
     {
         try
         {
@@ -54,11 +54,11 @@ public class AdminInstructionsFunction
     }
 
     /// <summary>
-    /// POST /api/admin/instructions - Save instructions.md content
+    /// POST /api/manage/instructions - Save instructions.md content
     /// </summary>
     [Function("AdminInstructionsSave")]
     public async Task<HttpResponseData> SaveInstructions(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "admin/instructions")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "manage/instructions")] HttpRequestData req)
     {
         try
         {

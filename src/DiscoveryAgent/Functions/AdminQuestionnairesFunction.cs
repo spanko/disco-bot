@@ -21,11 +21,11 @@ public class AdminQuestionnairesFunction
     }
 
     /// <summary>
-    /// GET /api/admin/questionnaires - List all questionnaires
+    /// GET /api/manage/questionnaires - List all questionnaires
     /// </summary>
     [Function("AdminQuestionnairesList")]
     public async Task<HttpResponseData> GetQuestionnaires(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "admin/questionnaires")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "manage/questionnaires")] HttpRequestData req)
     {
         try
         {
@@ -58,11 +58,11 @@ public class AdminQuestionnairesFunction
     }
 
     /// <summary>
-    /// GET /api/admin/questionnaire/{id} - Get single questionnaire
+    /// GET /api/manage/questionnaire/{id} - Get single questionnaire
     /// </summary>
     [Function("AdminQuestionnaireGet")]
     public async Task<HttpResponseData> GetQuestionnaire(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "admin/questionnaire/{questionnaireId}")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "manage/questionnaire/{questionnaireId}")] HttpRequestData req,
         string questionnaireId)
     {
         try
@@ -92,11 +92,11 @@ public class AdminQuestionnairesFunction
     }
 
     /// <summary>
-    /// DELETE /api/admin/questionnaire/{id} - Delete questionnaire
+    /// DELETE /api/manage/questionnaire/{id} - Delete questionnaire
     /// </summary>
     [Function("AdminQuestionnaireDelete")]
     public async Task<HttpResponseData> DeleteQuestionnaire(
-        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "admin/questionnaire/{questionnaireId}")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "manage/questionnaire/{questionnaireId}")] HttpRequestData req,
         string questionnaireId)
     {
         try

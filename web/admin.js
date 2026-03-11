@@ -87,8 +87,8 @@ async function loadContexts() {
 
     try {
         const url = API_KEY
-            ? `${API_BASE}/api/admin/contexts?code=${API_KEY}`
-            : `${API_BASE}/api/admin/contexts`;
+            ? `${API_BASE}/api/manage/contexts?code=${API_KEY}`
+            : `${API_BASE}/api/manage/contexts`;
 
         const response = await fetch(url);
 
@@ -221,8 +221,8 @@ async function saveContext() {
 
     try {
         const url = API_KEY
-            ? `${API_BASE}/api/admin/context?code=${API_KEY}`
-            : `${API_BASE}/api/admin/context`;
+            ? `${API_BASE}/api/manage/context?code=${API_KEY}`
+            : `${API_BASE}/api/manage/context`;
 
         const response = await fetch(url, {
             method: 'POST',
@@ -254,8 +254,8 @@ async function deleteContext(contextId) {
 
     try {
         const url = API_KEY
-            ? `${API_BASE}/api/admin/context/${contextId}?code=${API_KEY}`
-            : `${API_BASE}/api/admin/context/${contextId}`;
+            ? `${API_BASE}/api/manage/context/${contextId}?code=${API_KEY}`
+            : `${API_BASE}/api/manage/context/${contextId}`;
 
         const response = await fetch(url, { method: 'DELETE' });
 
@@ -288,8 +288,8 @@ async function loadInstructions() {
 
     try {
         const url = API_KEY
-            ? `${API_BASE}/api/admin/instructions?code=${API_KEY}`
-            : `${API_BASE}/api/admin/instructions`;
+            ? `${API_BASE}/api/manage/instructions?code=${API_KEY}`
+            : `${API_BASE}/api/manage/instructions`;
 
         const response = await fetch(url);
 
@@ -312,8 +312,8 @@ async function saveInstructions() {
 
     try {
         const url = API_KEY
-            ? `${API_BASE}/api/admin/instructions?code=${API_KEY}`
-            : `${API_BASE}/api/admin/instructions`;
+            ? `${API_BASE}/api/manage/instructions?code=${API_KEY}`
+            : `${API_BASE}/api/manage/instructions`;
 
         const response = await fetch(url, {
             method: 'POST',
@@ -370,8 +370,8 @@ async function loadQuestionnaires() {
 
     try {
         const url = API_KEY
-            ? `${API_BASE}/api/admin/questionnaires?code=${API_KEY}`
-            : `${API_BASE}/api/admin/questionnaires`;
+            ? `${API_BASE}/api/manage/questionnaires?code=${API_KEY}`
+            : `${API_BASE}/api/manage/questionnaires`;
 
         const response = await fetch(url);
 
@@ -443,8 +443,8 @@ async function deleteQuestionnaire(id) {
 
     try {
         const url = API_KEY
-            ? `${API_BASE}/api/admin/questionnaire/${id}?code=${API_KEY}`
-            : `${API_BASE}/api/admin/questionnaire/${id}`;
+            ? `${API_BASE}/api/manage/questionnaire/${id}?code=${API_KEY}`
+            : `${API_BASE}/api/manage/questionnaire/${id}`;
 
         const response = await fetch(url, { method: 'DELETE' });
 

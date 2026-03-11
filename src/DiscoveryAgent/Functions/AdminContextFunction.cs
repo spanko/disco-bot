@@ -21,11 +21,11 @@ public class AdminContextFunction
     }
 
     /// <summary>
-    /// GET /api/admin/contexts - List all contexts
+    /// GET /api/manage/contexts - List all contexts
     /// </summary>
     [Function("AdminContextsList")]
     public async Task<HttpResponseData> GetContexts(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "admin/contexts")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "manage/contexts")] HttpRequestData req)
     {
         try
         {
@@ -45,11 +45,11 @@ public class AdminContextFunction
     }
 
     /// <summary>
-    /// GET /api/admin/context/{contextId} - Get single context
+    /// GET /api/manage/context/{contextId} - Get single context
     /// </summary>
     [Function("AdminContextGet")]
     public async Task<HttpResponseData> GetContext(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "admin/context/{contextId}")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "manage/context/{contextId}")] HttpRequestData req,
         string contextId)
     {
         try
@@ -77,11 +77,11 @@ public class AdminContextFunction
     }
 
     /// <summary>
-    /// POST /api/admin/context - Create or update context
+    /// POST /api/manage/context - Create or update context
     /// </summary>
     [Function("AdminContextUpsert")]
     public async Task<HttpResponseData> UpsertContext(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "admin/context")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "manage/context")] HttpRequestData req)
     {
         try
         {
@@ -126,11 +126,11 @@ public class AdminContextFunction
     }
 
     /// <summary>
-    /// DELETE /api/admin/context/{contextId} - Delete context
+    /// DELETE /api/manage/context/{contextId} - Delete context
     /// </summary>
     [Function("AdminContextDelete")]
     public async Task<HttpResponseData> DeleteContext(
-        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "admin/context/{contextId}")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "manage/context/{contextId}")] HttpRequestData req,
         string contextId)
     {
         try
