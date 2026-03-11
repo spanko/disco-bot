@@ -1,0 +1,35 @@
+name: Deploy Static Web App
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - '.github/workflows/deploy-static-web.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AZURE_STATIC_WEB_APP_NAME: discdev-web-3xr5ve
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Azure Static Web Apps
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build And Deploy
+      id: builddeploy
+      uses: Azure/static-web-apps-deploy@v1
+      with:
+        azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        action: "upload"
+        app_location: "/web"
+        skip_app_build: true
+        skip_api_build: true
