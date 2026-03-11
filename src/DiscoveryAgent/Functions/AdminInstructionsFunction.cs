@@ -24,14 +24,20 @@ public class AdminInstructionsFunction
     {
         try
         {
-            if (!File.Exists(InstructionsPath))
+            var baseDirectory = AppContext.BaseDirectory;
+            var fullPath = Path.Combine(baseDirectory, InstructionsPath);
+
+            _logger.LogInformation("Attempting to read instructions from: {FullPath}", fullPath);
+
+            if (!File.Exists(fullPath))
             {
+                _logger.LogWarning("Instructions file not found at: {FullPath}", fullPath);
                 var notFound = req.CreateResponse(HttpStatusCode.NotFound);
-                await notFound.WriteStringAsync("Instructions file not found");
+                await notFound.WriteStringAsync($"Instructions file not found at {fullPath}");
                 return notFound;
             }
 
-            var content = await File.ReadAllTextAsync(InstructionsPath);
+            var content = await File.ReadAllTextAsync(fullPath);
 
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
@@ -65,23 +71,26 @@ public class AdminInstructionsFunction
                 return badRequest;
             }
 
+            var baseDirectory = AppContext.BaseDirectory;
+            var fullPath = Path.Combine(baseDirectory, InstructionsPath);
+
             // Ensure directory exists
-            var directory = Path.GetDirectoryName(InstructionsPath);
+            var directory = Path.GetDirectoryName(fullPath);
             if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }
 
             // Create backup of current file
-            if (File.Exists(InstructionsPath))
+            if (File.Exists(fullPath))
             {
-                var backupPath = $"{InstructionsPath}.{DateTime.UtcNow:yyyyMMddHHmmss}.bak";
-                File.Copy(InstructionsPath, backupPath);
+                var backupPath = $"{fullPath}.{DateTime.UtcNow:yyyyMMddHHmmss}.bak";
+                File.Copy(fullPath, backupPath);
                 _logger.LogInformation("Created backup: {BackupPath}", backupPath);
             }
 
             // Write new content
-            await File.WriteAllTextAsync(InstructionsPath, content);
+            await File.WriteAllTextAsync(fullPath, content);
 
             _logger.LogInformation("Instructions file updated successfully");
 
