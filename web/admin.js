@@ -1,8 +1,7 @@
 // Configuration
-// When deployed to Static Web App, use relative URLs that will be proxied to the Function App
-// When testing locally, use the full Function App URL
-const API_BASE = window.API_ENDPOINT || (window.location.hostname.includes('azurestaticapps.net') ? '' : 'https://discdev-func-3xr5ve.azurewebsites.net');
-const API_KEY = window.API_KEY || (window.location.hostname.includes('azurestaticapps.net') ? '' : 'pgA3mK7ono-cL9-IbQtLeLLWxfQa-UegTwIpjsgo7Z-vAzFuKKQSAw==');
+// Use direct Function App URLs with API key for admin endpoints that require authentication
+const API_BASE = window.API_ENDPOINT || 'https://discdev-func-3xr5ve.azurewebsites.net';
+const API_KEY = window.API_KEY || 'pgA3mK7ono-cL9-IbQtLeLLWxfQa-UegTwIpjsgo7Z-vAzFuKKQSAw==';
 
 // Global state
 let currentContexts = [];
