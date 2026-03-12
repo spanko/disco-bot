@@ -1,5 +1,6 @@
 using Azure.Identity;
 using Azure.AI.Projects;
+using Azure.AI.Agents.Persistent;
 using Azure.Search.Documents;
 using Azure.Storage.Blobs;
 using Microsoft.Azure.Cosmos;

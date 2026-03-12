@@ -105,7 +105,7 @@ public class QuestionnaireProcessor
     {
         _logger.LogInformation("Parsing questionnaire from {Url}", blobUrl);
 
-        var agents = _projectClient.GetPersistentAgentsClient();
+        var agents = _agentsClient;
         var thread = await agents.Threads.CreateThreadAsync();
 
         await agents.Messages.CreateMessageAsync(
