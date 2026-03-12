@@ -36,10 +36,12 @@ var host = new HostBuilder()
 
         // Foundry Persistent Agents Client
         // Expected format: https://<aiservices-id>.services.ai.azure.com/api/projects/<project-name>
-        // Smart endpoint construction - handles both formats
-        var projectEndpoint = settings.FoundryEndpoint.Contains("/api/projects/")
-            ? settings.FoundryEndpoint.TrimEnd('/')
-            : $"{settings.FoundryEndpoint.TrimEnd('/')}/api/projects/{settings.FoundryProjectName}";
+        // IMPORTANT: The Bicep output FOUNDRY_ENDPOINT may already include /api/projects/<name>,
+        // so we detect and avoid doubling the path.
+        var baseEndpoint = settings.FoundryEndpoint.TrimEnd('/');
+        var projectEndpoint = baseEndpoint.Contains("/api/projects/")
+            ? baseEndpoint
+            : $"{baseEndpoint}/api/projects/{settings.FoundryProjectName}";
 
         // Log the constructed endpoint for debugging (will show in startup logs)
         Console.WriteLine($"[Startup] Constructed project endpoint: {projectEndpoint}");

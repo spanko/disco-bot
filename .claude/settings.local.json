@@ -145,7 +145,8 @@
       "Bash(cmd /c \"echo %APPDATA%\")",
       "Bash(c:/temp/latest-logs.json)",
       "Bash(dotnet-script:*)",
-      "Bash(az cognitiveservices account deployment show:*)"
+      "Bash(az cognitiveservices account deployment show:*)",
+      "Bash(python -m json.tool:*)"
     ],
     "deny": [],
     "ask": []

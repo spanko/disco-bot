@@ -102,6 +102,9 @@ public class ConversationHandler
 
         // -----------------------------------------------------------------
         // Step 3: Run agent (uses model configured during agent creation)
+        // NOTE: maxCompletionTokens is set explicitly because the Foundry
+        // Agent Service may apply an implicit limit that causes runs to
+        // complete with zero output tokens if not specified.
         // -----------------------------------------------------------------
         _logger.LogInformation("Creating run: Thread={ThreadId}, Agent={AgentId}", threadId, _agentManager.AgentId);
         var run = await agentsClient.Runs.CreateRunAsync(
@@ -130,17 +133,20 @@ public class ConversationHandler
                     "Usage: Prompt={PromptTokens}, Completion={CompletionTokens}, " +
                     "IncompleteDetails={IncompleteDetails}",
                     run.Value.Id, run.Value.AssistantId, run.Value.Model,
-                    run.Value.Usage?.PromptTokens ?? 0,
-                    run.Value.Usage?.CompletionTokens ?? 0,
-                    run.Value.IncompleteDetails?.Reason ?? "none");
+                    run.Value.Usage?.PromptTokens ?? 0, run.Value.Usage?.CompletionTokens ?? 0,
+                    run.Value.IncompleteDetails ?? "none");
                 break;
             }
 
             if (status == RunStatus.Incomplete)
             {
-                _logger.LogWarning("Run {RunId} incomplete: {Details}",
-                    run.Value.Id, run.Value.IncompleteDetails?.Reason ?? "unknown");
-                // Still try to get messages — there might be a partial response
+                _logger.LogWarning(
+                    "Run {RunId} incomplete. Agent={AgentId}, Details={IncompleteDetails}, " +
+                    "Usage: Prompt={PromptTokens}, Completion={CompletionTokens}",
+                    run.Value.Id, run.Value.AssistantId,
+                    run.Value.IncompleteDetails ?? "none",
+                    run.Value.Usage?.PromptTokens ?? 0, run.Value.Usage?.CompletionTokens ?? 0);
+                // Still break and try to retrieve partial messages
                 break;
             }
 
