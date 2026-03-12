@@ -47,6 +47,19 @@ public class ConversationHandler
 
     public async Task<ConversationResponse> HandleAsync(ConversationRequest request)
     {
+        // Wait for agent initialization (blocks until ready, throws if init failed)
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            await _agentManager.WaitForReadyAsync(cts.Token);
+        }
+        catch (TimeoutException)
+        {
+            _logger.LogError("Agent initialization timed out after 30s");
+            throw new InvalidOperationException(
+                "The agent is still initializing. Please try again in a moment.");
+        }
+
         var agentsClient = _agentsClient;
 
         // -----------------------------------------------------------------
@@ -90,6 +103,7 @@ public class ConversationHandler
         // -----------------------------------------------------------------
         // Step 3: Run agent (uses model configured during agent creation)
         // -----------------------------------------------------------------
+        _logger.LogInformation("Creating run: Thread={ThreadId}, Agent={AgentId}", threadId, _agentManager.AgentId);
         var run = await agentsClient.Runs.CreateRunAsync(
             threadId,
             _agentManager.AgentId
@@ -108,13 +122,21 @@ public class ConversationHandler
             var status = run.Value.Status;
 
             if (status == RunStatus.Completed)
+            {
+                _logger.LogInformation(
+                    "Run {RunId} completed. Agent={AgentId}, Model={Model}, Usage: Prompt={PromptTokens}, Completion={CompletionTokens}",
+                    run.Value.Id, run.Value.AssistantId, run.Value.Model,
+                    run.Value.Usage?.PromptTokens ?? 0, run.Value.Usage?.CompletionTokens ?? 0);
                 break;
+            }
 
             if (status == RunStatus.Failed || status == RunStatus.Cancelled ||
                 status == RunStatus.Expired)
             {
-                _logger.LogError("Run failed with status: {Status}", status);
-                throw new InvalidOperationException($"Agent run failed: {status}");
+                _logger.LogError("Run {RunId} failed: Status={Status}, LastError={LastError}",
+                    run.Value.Id, status, run.Value.LastError?.Message ?? "(none)");
+                throw new InvalidOperationException(
+                    $"Agent run failed: {status} — {run.Value.LastError?.Message ?? "no error details"}");
             }
 
             if (status == RunStatus.RequiresAction)

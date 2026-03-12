@@ -8,6 +8,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using DiscoveryAgent.Configuration;
 using DiscoveryAgent.Services;
 using DiscoveryAgent.Handlers;
@@ -33,8 +34,15 @@ var host = new HostBuilder()
         var credential = new DefaultAzureCredential();
         services.AddSingleton(credential);
 
-        // Foundry Persistent Agents Client - uses project endpoint
+        // Foundry Persistent Agents Client
+        // Expected format: https://<aiservices-id>.services.ai.azure.com/api/projects/<project-name>
         var projectEndpoint = $"{settings.FoundryEndpoint.TrimEnd('/')}/api/projects/{settings.FoundryProjectName}";
+
+        // Log the constructed endpoint for debugging (will show in startup logs)
+        Console.WriteLine($"[Startup] Constructed project endpoint: {projectEndpoint}");
+        Console.WriteLine($"[Startup] Model deployment: {settings.PrimaryModelDeployment}");
+        Console.WriteLine($"[Startup] Agent name: {settings.AgentName}");
+
         services.AddSingleton(_ =>
             new PersistentAgentsClient(projectEndpoint, credential));
 
@@ -72,20 +80,32 @@ var host = new HostBuilder()
     })
     .Build();
 
-// Initialize agent on startup (run in background, don't block host startup)
-_ = Task.Run(async () =>
+// =====================================================================
+// Initialize agent BEFORE accepting requests.
+// This replaces the old fire-and-forget Task.Run that silently swallowed
+// errors and raced with incoming HTTP requests.
+// =====================================================================
+var logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
+
+try
 {
-    try
-    {
-        using var scope = host.Services.CreateScope();
-        var agentManager = scope.ServiceProvider.GetRequiredService<AgentManager>();
-        await agentManager.EnsureAgentExistsAsync();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Warning: Failed to initialize agent on startup: {ex.Message}");
-    }
-});
+    logger.LogInformation("Starting agent initialization...");
+    var agentManager = host.Services.GetRequiredService<AgentManager>();
+    await agentManager.EnsureAgentExistsAsync();
+    logger.LogInformation("Agent initialization complete. Starting host.");
+}
+catch (Exception ex)
+{
+    // Log the FULL exception — don't swallow it like before.
+    // The app will still start (so health checks work), but the agent
+    // readiness signal will be in a faulted state, and ConversationHandler
+    // will report a clear error to callers.
+    logger.LogCritical(ex,
+        "Agent initialization FAILED. The bot will return errors until this is resolved. " +
+        "Check: (1) FOUNDRY_ENDPOINT is correct, (2) model deployment '{Model}' exists, " +
+        "(3) the managed identity has Cognitive Services User role.",
+        host.Services.GetRequiredService<DiscoveryBotSettings>().PrimaryModelDeployment);
+}
 
 host.Run();
 

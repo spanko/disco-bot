@@ -1,3 +1,4 @@
+using Azure;
 using Azure.AI.Agents.Persistent;
 using Azure.AI.Projects;
 using Azure.Identity;
@@ -13,6 +14,12 @@ namespace DiscoveryAgent.Services;
 /// and context management. This is the bridge between the configurable
 /// layer (instructions.md, agent.yaml, discovery contexts) and the
 /// Foundry Agent Service runtime.
+///
+/// Key design decisions:
+/// - Uses a SemaphoreSlim to ensure only one initialization runs at a time
+/// - Persists agent ID to Cosmos so restarts reuse the same agent
+/// - Falls back to creating a new agent only if the persisted one is gone
+/// - Exposes a TaskCompletionSource so callers can await readiness
 /// </summary>
 public class AgentManager
 {
@@ -22,9 +29,28 @@ public class AgentManager
     private readonly ILogger<AgentManager> _logger;
 
     private string? _agentId;
+    private readonly SemaphoreSlim _initLock = new(1, 1);
+    private readonly TaskCompletionSource _readySignal = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
+    // Cosmos container/key for persisting the agent ID across restarts
+    private const string AgentMetaContainer = "agent-meta";
+    private const string AgentMetaId = "current-agent";
+
+    /// <summary>
+    /// Returns the current agent ID, or throws if not yet initialized.
+    /// Prefer <see cref="WaitForReadyAsync"/> in request handlers.
+    /// </summary>
     public string AgentId => _agentId
         ?? throw new InvalidOperationException("Agent not yet initialized. Call EnsureAgentExistsAsync first.");
+
+    /// <summary>
+    /// Await this in request handlers to block until the agent is ready.
+    /// Throws if initialization failed.
+    /// </summary>
+    public Task WaitForReadyAsync(CancellationToken ct = default)
+    {
+        return _readySignal.Task.WaitAsync(ct);
+    }
 
     public AgentManager(
         PersistentAgentsClient agentsClient,
@@ -40,32 +66,175 @@ public class AgentManager
 
     /// <summary>
     /// Ensures the discovery agent exists in Foundry Agent Service.
-    /// Creates it on first run, or retrieves the existing agent ID.
+    /// 1. Checks Cosmos for a previously persisted agent ID
+    /// 2. If found, validates the agent still exists in Foundry
+    /// 3. If not found or stale, creates a new agent and persists the ID
+    ///
+    /// This is safe to call concurrently — the SemaphoreSlim serializes.
     /// </summary>
     public async Task EnsureAgentExistsAsync()
     {
-        _logger.LogInformation("Initializing discovery agent...");
+        await _initLock.WaitAsync();
+        try
+        {
+            // Already initialized in this process?
+            if (_agentId is not null)
+            {
+                _logger.LogInformation("Agent already initialized: {AgentId}", _agentId);
+                return;
+            }
 
-        // Load system prompt from the configurable instructions file
+            _logger.LogInformation("Initializing discovery agent...");
+            _logger.LogInformation("  Endpoint base: {Endpoint}", _settings.FoundryEndpoint);
+            _logger.LogInformation("  Project: {Project}", _settings.FoundryProjectName);
+            _logger.LogInformation("  Model deployment: {Model}", _settings.PrimaryModelDeployment);
+
+            // Step 1: Try to recover a previously persisted agent ID from Cosmos
+            var persistedId = await LoadPersistedAgentIdAsync();
+
+            if (persistedId is not null)
+            {
+                _logger.LogInformation("Found persisted agent ID: {AgentId}. Validating...", persistedId);
+
+                if (await TryValidateAgentAsync(persistedId))
+                {
+                    _agentId = persistedId;
+                    _logger.LogInformation("Persisted agent is valid and ready: {AgentId}", _agentId);
+                    _readySignal.TrySetResult();
+                    return;
+                }
+
+                _logger.LogWarning("Persisted agent {AgentId} no longer exists in Foundry. Will create a new one.", persistedId);
+            }
+            else
+            {
+                _logger.LogInformation("No persisted agent ID found. Creating new agent...");
+            }
+
+            // Step 2: Create a fresh agent
+            await CreateNewAgentAsync();
+
+            _readySignal.TrySetResult();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "FATAL: Failed to initialize agent. The bot will not function.");
+            _readySignal.TrySetException(ex);
+            throw;
+        }
+        finally
+        {
+            _initLock.Release();
+        }
+    }
+
+    /// <summary>
+    /// Creates a new agent in Foundry and persists its ID to Cosmos.
+    /// </summary>
+    private async Task CreateNewAgentAsync()
+    {
         var instructions = await LoadInstructionsAsync();
+        var tools = BuildToolDefinitions().ToList();
+
+        _logger.LogInformation("Creating agent with {ToolCount} tools, {InstructionLength} char instructions",
+            tools.Count, instructions.Length);
 
         try
         {
-            // Create the agent using the Persistent Agents API
             var agent = await _agentsClient.Administration.CreateAgentAsync(
                 _settings.PrimaryModelDeployment,
                 _settings.AgentName,
                 instructions: instructions,
-                tools: BuildToolDefinitions()
+                tools: tools
             );
 
             _agentId = agent.Value.Id;
-            _logger.LogInformation("Agent ready: {AgentId}", _agentId);
+            _logger.LogInformation("Agent created successfully: {AgentId} (Name={Name}, Model={Model})",
+                _agentId, agent.Value.Name, agent.Value.Model);
+
+            // Persist the agent ID so we can reuse it after restarts
+            await PersistAgentIdAsync(_agentId);
+        }
+        catch (RequestFailedException ex)
+        {
+            _logger.LogError(ex, "Foundry API error creating agent: Status={Status}, Code={Code}, Message={Message}",
+                ex.Status, ex.ErrorCode, ex.Message);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Validates that an agent ID still exists in Foundry by calling GetAgent.
+    /// Returns false if the agent is gone (404) or the call fails.
+    /// </summary>
+    private async Task<bool> TryValidateAgentAsync(string agentId)
+    {
+        try
+        {
+            var agent = await _agentsClient.Administration.GetAgentAsync(agentId);
+            _logger.LogInformation("Validated agent: {AgentId} (Name={Name}, Model={Model})",
+                agent.Value.Id, agent.Value.Name, agent.Value.Model);
+            return true;
+        }
+        catch (RequestFailedException ex) when (ex.Status == 404)
+        {
+            _logger.LogWarning("Agent {AgentId} not found (404)", agentId);
+            return false;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to initialize agent");
-            throw;
+            _logger.LogWarning(ex, "Failed to validate agent {AgentId}. Will recreate.", agentId);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Loads a previously persisted agent ID from Cosmos DB.
+    /// Returns null if no record exists or the container isn't set up yet.
+    /// </summary>
+    private async Task<string?> LoadPersistedAgentIdAsync()
+    {
+        try
+        {
+            var container = _cosmosDb.GetContainer(AgentMetaContainer);
+            var response = await container.ReadItemAsync<AgentMetaRecord>(
+                AgentMetaId, new PartitionKey(AgentMetaId));
+            return response.Resource.AgentId;
+        }
+        catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not read persisted agent ID from Cosmos (container may not exist yet)");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Persists the agent ID to Cosmos DB so it survives app restarts.
+    /// </summary>
+    private async Task PersistAgentIdAsync(string agentId)
+    {
+        try
+        {
+            var container = _cosmosDb.GetContainer(AgentMetaContainer);
+            var record = new AgentMetaRecord
+            {
+                Id = AgentMetaId,
+                AgentId = agentId,
+                CreatedAt = DateTimeOffset.UtcNow,
+                ModelDeployment = _settings.PrimaryModelDeployment,
+                AgentName = _settings.AgentName,
+            };
+            await container.UpsertItemAsync(record, new PartitionKey(AgentMetaId));
+            _logger.LogInformation("Persisted agent ID {AgentId} to Cosmos", agentId);
+        }
+        catch (Exception ex)
+        {
+            // Non-fatal: we can still function, just won't reuse across restarts
+            _logger.LogWarning(ex, "Failed to persist agent ID to Cosmos. Agent will be recreated on next restart.");
         }
     }
 
@@ -178,15 +347,8 @@ public class AgentManager
         return [];
 
         /* DISABLED FOR TESTING
-        // File search is built-in to Foundry Agent Service
-        // Custom tools are registered as function definitions
         return
         [
-            // Built-in file search for RAG
-            // TEMPORARILY DISABLED - Known issue: file_search causes completed runs with no messages
-            // new FileSearchToolDefinition(),
-
-            // Custom: Extract structured knowledge from conversation
             new FunctionToolDefinition(
                 name: "extract_knowledge",
                 description: "Extract and categorize knowledge items from the user's response. " +
@@ -218,7 +380,6 @@ public class AgentManager
                 })
             ),
 
-            // Custom: Store user profile/role information
             new FunctionToolDefinition(
                 name: "store_user_profile",
                 description: "Store or update the user's role profile based on what they've shared. " +
@@ -238,7 +399,6 @@ public class AgentManager
                 })
             ),
 
-            // Custom: Mark questionnaire section complete
             new FunctionToolDefinition(
                 name: "complete_questionnaire_section",
                 description: "Mark a questionnaire section as complete and summarize findings.",
@@ -273,4 +433,25 @@ public class AgentManager
         as a fact, opinion, decision, requirement, or concern, noting confidence level
         and relationships to other captured knowledge.
         """;
+
+    /// <summary>
+    /// Internal record for persisting agent metadata in Cosmos DB.
+    /// </summary>
+    private record AgentMetaRecord
+    {
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public string Id { get; init; } = AgentMetaId;
+
+        [System.Text.Json.Serialization.JsonPropertyName("agentId")]
+        public string AgentId { get; init; } = "";
+
+        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
+        public DateTimeOffset CreatedAt { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("modelDeployment")]
+        public string ModelDeployment { get; init; } = "";
+
+        [System.Text.Json.Serialization.JsonPropertyName("agentName")]
+        public string AgentName { get; init; } = "";
+    }
 }
