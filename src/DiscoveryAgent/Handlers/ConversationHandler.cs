@@ -88,12 +88,11 @@ public class ConversationHandler
         );
 
         // -----------------------------------------------------------------
-        // Step 3: Run agent with explicit model deployment
+        // Step 3: Run agent (uses model configured during agent creation)
         // -----------------------------------------------------------------
         var run = await agentsClient.Runs.CreateRunAsync(
             threadId,
-            _agentManager.AgentId,
-            _settings.PrimaryModelDeployment
+            _agentManager.AgentId
         );
 
         var extractedKnowledgeIds = new List<string>();
