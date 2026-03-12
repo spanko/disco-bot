@@ -12,7 +12,7 @@ namespace DiscoveryAgent.Services;
 /// </summary>
 public class QuestionnaireProcessor
 {
-    private readonly AIProjectClient _projectClient;
+    private readonly PersistentAgentsClient _agentsClient;
     private readonly DiscoveryBotSettings _settings;
     private readonly ILogger<QuestionnaireProcessor> _logger;
 
@@ -26,11 +26,11 @@ public class QuestionnaireProcessor
     ];
 
     public QuestionnaireProcessor(
-        AIProjectClient projectClient,
+        PersistentAgentsClient agentsClient,
         DiscoveryBotSettings settings,
         ILogger<QuestionnaireProcessor> logger)
     {
-        _projectClient = projectClient;
+        _agentsClient = agentsClient;
         _settings = settings;
         _logger = logger;
     }
@@ -46,7 +46,7 @@ public class QuestionnaireProcessor
         // Use the LLM to analyze the document structure
         try
         {
-            var agents = _projectClient.GetPersistentAgentsClient();
+            var agents = _agentsClient;
             var thread = await agents.Threads.CreateThreadAsync();
 
             // Upload the file reference and ask for analysis

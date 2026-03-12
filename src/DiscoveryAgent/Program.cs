@@ -32,10 +32,10 @@ var host = new HostBuilder()
         var credential = new DefaultAzureCredential();
         services.AddSingleton(credential);
 
-        // Foundry Client - must use project endpoint, not just account endpoint
+        // Foundry Persistent Agents Client - uses project endpoint
         var projectEndpoint = $"{settings.FoundryEndpoint.TrimEnd('/')}/api/projects/{settings.FoundryProjectName}";
         services.AddSingleton(_ =>
-            new AIProjectClient(new Uri(projectEndpoint), credential));
+            new PersistentAgentsClient(projectEndpoint, credential));
 
         // AI Search Client
         services.AddSingleton(_ =>

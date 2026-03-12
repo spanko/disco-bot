@@ -131,7 +131,13 @@
       "Bash(Select-String -Pattern \"HTTP|Content-Type|\\[\")",
       "Bash(az resource show:*)",
       "Bash(\"DiscoveryBot__CosmosEndpoint=https://discdev-cosmos-3xr5ve.documents.azure.com:443/\" )",
-      "Bash(\"DiscoveryBot__AgentName=discovery-bot\")"
+      "Bash(\"DiscoveryBot__AgentName=discovery-bot\")",
+      "Bash(az functionapp identity:*)",
+      "Bash(az cosmosdb sql role assignment create:*)",
+      "Bash(MSYS_NO_PATHCONV=1 az cosmosdb:*)",
+      "Bash(MSYS_NO_PATHCONV=1 az role assignment create:*)",
+      "Bash(git log:*)",
+      "Bash(dotnet list package:*)"
     ],
     "deny": [],
     "ask": []

@@ -19,7 +19,7 @@ namespace DiscoveryAgent.Handlers;
 /// </summary>
 public class ConversationHandler
 {
-    private readonly AIProjectClient _projectClient;
+    private readonly PersistentAgentsClient _agentsClient;
     private readonly AgentManager _agentManager;
     private readonly KnowledgeStore _knowledgeStore;
     private readonly UserProfileService _userProfiles;
@@ -28,7 +28,7 @@ public class ConversationHandler
     private readonly ILogger<ConversationHandler> _logger;
 
     public ConversationHandler(
-        AIProjectClient projectClient,
+        PersistentAgentsClient agentsClient,
         AgentManager agentManager,
         KnowledgeStore knowledgeStore,
         UserProfileService userProfiles,
@@ -36,7 +36,7 @@ public class ConversationHandler
         DiscoveryBotSettings settings,
         ILogger<ConversationHandler> logger)
     {
-        _projectClient = projectClient;
+        _agentsClient = agentsClient;
         _agentManager = agentManager;
         _knowledgeStore = knowledgeStore;
         _userProfiles = userProfiles;
@@ -47,7 +47,7 @@ public class ConversationHandler
 
     public async Task<ConversationResponse> HandleAsync(ConversationRequest request)
     {
-        var agentsClient = _projectClient.GetPersistentAgentsClient();
+        var agentsClient = _agentsClient;
 
         // -----------------------------------------------------------------
         // Step 1: Get or create thread

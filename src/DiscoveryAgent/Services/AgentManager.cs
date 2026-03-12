@@ -16,7 +16,7 @@ namespace DiscoveryAgent.Services;
 /// </summary>
 public class AgentManager
 {
-    private readonly AIProjectClient _projectClient;
+    private readonly PersistentAgentsClient _agentsClient;
     private readonly DiscoveryBotSettings _settings;
     private readonly Database _cosmosDb;
     private readonly ILogger<AgentManager> _logger;
@@ -27,12 +27,12 @@ public class AgentManager
         ?? throw new InvalidOperationException("Agent not yet initialized. Call EnsureAgentExistsAsync first.");
 
     public AgentManager(
-        AIProjectClient projectClient,
+        PersistentAgentsClient agentsClient,
         DiscoveryBotSettings settings,
         Database cosmosDb,
         ILogger<AgentManager> logger)
     {
-        _projectClient = projectClient;
+        _agentsClient = agentsClient;
         _settings = settings;
         _cosmosDb = cosmosDb;
         _logger = logger;
@@ -51,12 +51,8 @@ public class AgentManager
 
         try
         {
-            // Try to find existing agent by name
-            var agents = _projectClient.GetPersistentAgentsClient();
-            // NOTE: The actual SDK method to list/find agents may differ.
-            // This represents the intent — create if not exists.
-
-            var agent = await agents.Administration.CreateAgentAsync(
+            // Create the agent using the Persistent Agents API
+            var agent = await _agentsClient.Administration.CreateAgentAsync(
                 _settings.PrimaryModelDeployment,
                 _settings.AgentName,
                 instructions: instructions,
