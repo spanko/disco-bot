@@ -1,6 +1,6 @@
 // Configuration - will be injected by Static Web App configuration
 const API_BASE = window.API_ENDPOINT || 'https://discdev-func-3xr5ve.azurewebsites.net';
-const API_KEY = window.API_KEY || 'pgA3mK7ono-cL9-IbQtLeLLWxfQa-UegTwIpjsgo7Z-vAzFuKKQSAw=='; // Replace with your actual default key
+const API_KEY = window.API_KEY || 'VxOdrb12vGGjbYLIt7CQ7Jc6BsbyavW-dZejQhvVqo9dAzFumvoeQw=='; // Conversation function key
 
 const userId = 'user-' + Math.random().toString(36).substring(7);
 let threadId = null;
