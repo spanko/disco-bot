@@ -62,16 +62,16 @@ async function sendMessage() {
 
         const data = await response.json();
 
-        if (data.threadId) {
-            threadId = data.threadId;
+        if (data.ThreadId || data.threadId) {
+            threadId = data.ThreadId || data.threadId;
         }
 
-        addMessage(data.response || JSON.stringify(data), 'agent');
+        addMessage(data.Response || data.response || JSON.stringify(data), 'agent');
 
         // If knowledge was extracted, show a subtle notification
-        if (data.extractedKnowledgeIds && data.extractedKnowledgeIds.length > 0) {
+        if (data.ExtractedKnowledgeIds || data.extractedKnowledgeIds && data.ExtractedKnowledgeIds || data.extractedKnowledgeIds.length > 0) {
             addMessage(
-                `✓ Captured ${data.extractedKnowledgeIds.length} knowledge item(s)`,
+                `✓ Captured ${data.ExtractedKnowledgeIds || data.extractedKnowledgeIds.length} knowledge item(s)`,
                 'system'
             );
         }
