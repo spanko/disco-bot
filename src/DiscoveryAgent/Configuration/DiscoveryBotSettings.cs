@@ -11,7 +11,7 @@ public class DiscoveryBotSettings
     public string FoundryEndpoint { get; set; } = "";
     public string FoundryAccountName { get; set; } = "";
     public string FoundryProjectName { get; set; } = "";
-    public string PrimaryModelDeployment { get; set; } = "gpt-5.2-chat";
+    public string PrimaryModelDeployment { get; set; } = "gpt-4o-mini";
     public string FallbackModelDeployment { get; set; } = "gpt-4o";
 
     // Azure AI Search
