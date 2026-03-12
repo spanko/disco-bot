@@ -342,11 +342,8 @@ public class AgentManager
     /// </summary>
     private IEnumerable<ToolDefinition> BuildToolDefinitions()
     {
-        // TESTING: Return empty tool list to isolate issue
-        // File search and custom tools disabled to test basic agent execution
-        return [];
-
-        /* DISABLED FOR TESTING
+        // NOTE: File search tool removed due to known issue with empty vector stores
+        // causing runs to complete without generating messages
         return
         [
             new FunctionToolDefinition(
@@ -415,7 +412,6 @@ public class AgentManager
                 })
             ),
         ];
-        */
     }
 
     private static string GetDefaultSystemPrompt() => """

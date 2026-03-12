@@ -11,8 +11,8 @@ public class DiscoveryBotSettings
     public string FoundryEndpoint { get; set; } = "";
     public string FoundryAccountName { get; set; } = "";
     public string FoundryProjectName { get; set; } = "";
-    public string PrimaryModelDeployment { get; set; } = "gpt-5.2";
-    public string FallbackModelDeployment { get; set; } = "gpt-4.1-mini";
+    public string PrimaryModelDeployment { get; set; } = "gpt-4o-mini";
+    public string FallbackModelDeployment { get; set; } = "gpt-4o";
 
     // Azure AI Search
     public string AiSearchEndpoint { get; set; } = "";
@@ -47,8 +47,8 @@ public class DiscoveryBotSettings
         FoundryEndpoint = Env("FOUNDRY_ENDPOINT"),
         FoundryAccountName = Env("FOUNDRY_ACCOUNT_NAME"),
         FoundryProjectName = Env("FOUNDRY_PROJECT_NAME"),
-        PrimaryModelDeployment = Env("PRIMARY_MODEL_DEPLOYMENT", "gpt-5.2"),
-        FallbackModelDeployment = Env("FALLBACK_MODEL_DEPLOYMENT", "gpt-4.1-mini"),
+        PrimaryModelDeployment = Env("PRIMARY_MODEL_DEPLOYMENT", "gpt-4o-mini"),
+        FallbackModelDeployment = Env("FALLBACK_MODEL_DEPLOYMENT", "gpt-4o"),
         AiSearchEndpoint = Env("AI_SEARCH_ENDPOINT"),
         AiSearchName = Env("AI_SEARCH_NAME"),
         CosmosEndpoint = Env("COSMOS_ENDPOINT"),
