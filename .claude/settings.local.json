@@ -137,7 +137,12 @@
       "Bash(MSYS_NO_PATHCONV=1 az cosmosdb:*)",
       "Bash(MSYS_NO_PATHCONV=1 az role assignment create:*)",
       "Bash(git log:*)",
-      "Bash(dotnet list package:*)"
+      "Bash(dotnet list package:*)",
+      "Bash(tee:*)",
+      "Bash(az monitor app-insights component show:*)",
+      "Bash(mcp list:*)",
+      "Bash(where:*)",
+      "Bash(cmd /c \"echo %APPDATA%\")"
     ],
     "deny": [],
     "ask": []

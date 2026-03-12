@@ -178,7 +178,8 @@ public class AgentManager
         return
         [
             // Built-in file search for RAG
-            new FileSearchToolDefinition(),
+            // TEMPORARILY DISABLED - Known issue: file_search causes completed runs with no messages
+            // new FileSearchToolDefinition(),
 
             // Custom: Extract structured knowledge from conversation
             new FunctionToolDefinition(
