@@ -32,9 +32,10 @@ var host = new HostBuilder()
         var credential = new DefaultAzureCredential();
         services.AddSingleton(credential);
 
-        // Foundry Client
+        // Foundry Client - must use project endpoint, not just account endpoint
+        var projectEndpoint = $"{settings.FoundryEndpoint.TrimEnd('/')}/api/projects/{settings.FoundryProjectName}";
         services.AddSingleton(_ =>
-            new AIProjectClient(new Uri(settings.FoundryEndpoint), credential));
+            new AIProjectClient(new Uri(projectEndpoint), credential));
 
         // AI Search Client
         services.AddSingleton(_ =>
