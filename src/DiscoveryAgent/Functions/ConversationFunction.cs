@@ -21,18 +21,32 @@ public class ConversationFunction
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = "conversation")] HttpRequestData req)
     {
-        var request = await req.ReadFromJsonAsync<ConversationRequest>();
-        if (request is null)
+        try
         {
-            var badResponse = req.CreateResponse(HttpStatusCode.BadRequest);
-            await badResponse.WriteStringAsync("Invalid request body");
-            return badResponse;
+            var request = await req.ReadFromJsonAsync<ConversationRequest>();
+            if (request is null)
+            {
+                var badResponse = req.CreateResponse(HttpStatusCode.BadRequest);
+                await badResponse.WriteStringAsync("Invalid request body");
+                return badResponse;
+            }
+
+            var result = await _handler.HandleAsync(request);
+
+            var response = req.CreateResponse(HttpStatusCode.OK);
+            await response.WriteAsJsonAsync(result);
+            return response;
         }
-
-        var result = await _handler.HandleAsync(request);
-
-        var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(result);
-        return response;
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing conversation");
+            var errorResponse = req.CreateResponse(HttpStatusCode.InternalServerError);
+            await errorResponse.WriteAsJsonAsync(new
+            {
+                error = "Failed to process conversation",
+                details = ex.Message
+            });
+            return errorResponse;
+        }
     }
 }
