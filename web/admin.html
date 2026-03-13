@@ -235,7 +235,64 @@
                     <select id="knowledgeContext" class="filter-select">
                         <option value="">All Contexts</option>
                     </select>
+                    <button id="exportDropdown" class="btn btn-secondary" onclick="toggleExportPanel()">
+                        <span class="icon">📥</span> Export
+                    </button>
                 </div>
+
+                <!-- Export Options Panel -->
+                <div id="exportPanel" class="export-panel" style="display: none;">
+                    <div class="export-options">
+                        <h4>Export Discovery Data</h4>
+                        <div class="form-group">
+                            <label>Format:</label>
+                            <select id="exportFormat">
+                                <option value="json">JSON (Full Data with Metadata)</option>
+                                <option value="csv">CSV (For Excel/Analysis)</option>
+                                <option value="markdown">Markdown Report (Human-Readable)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date Range (optional):</label>
+                            <input type="date" id="exportStartDate" />
+                            <span> to </span>
+                            <input type="date" id="exportEndDate" />
+                        </div>
+                        <div class="form-group">
+                            <label>Filter by User ID (optional):</label>
+                            <input type="text" id="exportUserId" placeholder="Leave blank for all users" />
+                        </div>
+                        <div class="export-actions">
+                            <button class="btn btn-primary" onclick="exportData()">
+                                <span class="icon">💾</span> Download
+                            </button>
+                            <button class="btn btn-secondary" onclick="toggleExportPanel()">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Knowledge Statistics -->
+                <div class="knowledge-stats">
+                    <div class="stat-card">
+                        <h4>Total Items</h4>
+                        <div class="stat-value" id="totalKnowledge">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Verified</h4>
+                        <div class="stat-value" id="verifiedKnowledge">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Avg Confidence</h4>
+                        <div class="stat-value" id="avgConfidence">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Contributors</h4>
+                        <div class="stat-value" id="uniqueContributors">0</div>
+                    </div>
+                </div>
+
                 <div id="knowledgeGrid" class="grid-container">
                     <div class="loading-state">Loading knowledge items...</div>
                 </div>

@@ -712,6 +712,7 @@ async function loadKnowledge() {
         const data = await response.json();
         currentKnowledge = data.items || [];
         renderKnowledge(currentKnowledge);
+        updateKnowledgeStats(currentKnowledge);
 
         // Populate context filter
         const contexts = [...new Set(currentKnowledge.map(k => k.relatedContextId).filter(Boolean))];
@@ -779,7 +780,105 @@ function filterKnowledge() {
     }
 
     renderKnowledge(filtered);
+    updateKnowledgeStats(filtered);
 }
+
+// ============================================================================
+// Export Functions
+// ============================================================================
+
+function toggleExportPanel() {
+    const panel = document.getElementById('exportPanel');
+    if (panel) {
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+async function exportData() {
+    const format = document.getElementById('exportFormat').value;
+    const startDate = document.getElementById('exportStartDate').value;
+    const endDate = document.getElementById('exportEndDate').value;
+    const userId = document.getElementById('exportUserId').value;
+    const contextFilter = document.getElementById('knowledgeContext').value;
+
+    // Build query parameters
+    const params = new URLSearchParams();
+    params.append('format', format);
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    if (userId) params.append('userId', userId);
+    if (contextFilter) params.append('contextId', contextFilter);
+
+    try {
+        showToast('Preparing export...', 'info');
+
+        const url = `${API_BASE}/api/manage/export?code=${API_KEY}&${params.toString()}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error('Export failed');
+        }
+
+        // Get the filename from Content-Disposition header or use default
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = `discovery-export-${format}.${format === 'json' ? 'json' : format === 'csv' ? 'csv' : 'md'}`;
+        if (contentDisposition) {
+            const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+            if (match && match[1]) {
+                filename = match[1].replace(/['"]/g, '');
+            }
+        }
+
+        // Download the file
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(downloadUrl);
+
+        showToast('Export downloaded successfully', 'success');
+        toggleExportPanel();
+    } catch (error) {
+        console.error('Export error:', error);
+        showToast('Failed to export data', 'error');
+    }
+}
+
+function updateKnowledgeStats(items = currentKnowledge) {
+    // Update statistics
+    const totalKnowledge = document.getElementById('totalKnowledge');
+    const verifiedKnowledge = document.getElementById('verifiedKnowledge');
+    const avgConfidence = document.getElementById('avgConfidence');
+    const uniqueContributors = document.getElementById('uniqueContributors');
+
+    if (totalKnowledge) {
+        totalKnowledge.textContent = items.length;
+    }
+
+    if (verifiedKnowledge) {
+        const verified = items.filter(item => item.verified).length;
+        verifiedKnowledge.textContent = verified;
+    }
+
+    if (avgConfidence) {
+        const totalConfidence = items.reduce((sum, item) => sum + (item.confidence || 0), 0);
+        const avg = items.length > 0 ? Math.round((totalConfidence / items.length) * 100) : 0;
+        avgConfidence.textContent = `${avg}%`;
+    }
+
+    if (uniqueContributors) {
+        const contributors = new Set(items.map(item => item.sourceUserId).filter(Boolean));
+        uniqueContributors.textContent = contributors.size;
+    }
+}
+
+// Make export functions globally available
+window.toggleExportPanel = toggleExportPanel;
+window.exportData = exportData;
 
 // ============================================================================
 // Org Chart

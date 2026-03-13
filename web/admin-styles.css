@@ -640,6 +640,80 @@ body {
     overflow-y: auto;
 }
 
+/* Export Panel */
+.export-panel {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.export-options h4 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.export-options .form-group {
+    margin-bottom: 15px;
+}
+
+.export-options label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.export-options select,
+.export-options input[type="date"],
+.export-options input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+}
+
+.export-options input[type="date"] {
+    width: auto;
+    display: inline-block;
+}
+
+.export-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+/* Knowledge Statistics */
+.knowledge-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.knowledge-stats .stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.knowledge-stats .stat-card h4 {
+    font-size: 14px;
+    color: #999;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .sidebar {
