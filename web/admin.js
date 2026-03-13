@@ -7,10 +7,12 @@ const API_KEY = window.API_KEY || 'QCuEUGIB51YmmbNrLSEch_uFCyA-PAQ8oFiOiY1icHsjA
 let currentContexts = [];
 let currentQuestionnaires = [];
 let currentKnowledge = [];
+let currentConversations = [];
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     initializeNavigation();
+    initializeConversations();
     initializeContexts();
     initializeInstructions();
     initializeQuestionnaires();
@@ -41,6 +43,7 @@ function initializeNavigation() {
 
             // Update header
             const titles = {
+                'conversations': 'Conversations',
                 'contexts': 'Discovery Contexts',
                 'instructions': 'Agent Instructions',
                 'questionnaires': 'Questionnaires',
@@ -63,6 +66,227 @@ function initializeNavigation() {
         });
     });
 }
+
+// ============================================================================
+// Conversations Section
+// ============================================================================
+
+function initializeConversations() {
+    loadConversations();
+
+    // Set up event listeners
+    const refreshBtn = document.getElementById('refreshConversations');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', loadConversations);
+    }
+
+    const searchInput = document.getElementById('conversationSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', filterConversations);
+    }
+
+    const filterSelect = document.getElementById('conversationFilter');
+    if (filterSelect) {
+        filterSelect.addEventListener('change', filterConversations);
+    }
+}
+
+async function loadConversations() {
+    const grid = document.getElementById('conversationsGrid');
+    if (!grid) return;
+
+    grid.innerHTML = '<div class="loading-state">Loading conversations...</div>';
+
+    try {
+        // For now, we'll simulate the data since the backend function needs to be deployed
+        // In production, this would call: ${API_BASE}/api/manage/threads?code=${API_KEY}
+
+        // Simulated data for demonstration
+        currentConversations = [
+            {
+                threadId: 'thread-abc123',
+                userId: 'web-user-xyz789',
+                createdAt: new Date(Date.now() - 3600000),
+                lastActivity: new Date(),
+                messageCount: 12,
+                status: 'active'
+            },
+            {
+                threadId: 'thread-def456',
+                userId: 'web-user-abc456',
+                createdAt: new Date(Date.now() - 86400000),
+                lastActivity: new Date(Date.now() - 7200000),
+                messageCount: 8,
+                status: 'active'
+            }
+        ];
+
+        renderConversations(currentConversations);
+        updateConversationStats(currentConversations);
+
+    } catch (error) {
+        console.error('Error loading conversations:', error);
+        grid.innerHTML = '<div class="empty-state">Failed to load conversations. Will be available after deployment.</div>';
+    }
+}
+
+function renderConversations(conversations) {
+    const grid = document.getElementById('conversationsGrid');
+    if (!grid) return;
+
+    if (conversations.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No conversations found.</div>';
+        return;
+    }
+
+    grid.innerHTML = conversations.map(conv => {
+        const created = new Date(conv.createdAt);
+        const lastActive = new Date(conv.lastActivity || conv.createdAt);
+        const isRecent = (Date.now() - lastActive) < 86400000; // Active in last 24h
+
+        return `
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Thread: ${escapeHtml(conv.threadId.substring(0, 12))}...</div>
+                    <div class="card-actions">
+                        <button class="card-action-btn" onclick="viewConversation('${conv.threadId}')" title="View">👁️</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p><strong>User:</strong> ${escapeHtml(conv.userId)}</p>
+                    <p><strong>Messages:</strong> ${conv.messageCount || 0}</p>
+                    <p><strong>Started:</strong> ${created.toLocaleDateString()} ${created.toLocaleTimeString()}</p>
+                    ${isRecent ? '<span class="badge badge-active">Active</span>' : ''}
+                </div>
+                <div class="card-footer">
+                    <span>Last activity: ${lastActive.toLocaleTimeString()}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function filterConversations() {
+    const search = document.getElementById('conversationSearch').value.toLowerCase();
+    const filter = document.getElementById('conversationFilter').value;
+
+    let filtered = [...currentConversations];
+
+    // Apply search
+    if (search) {
+        filtered = filtered.filter(c =>
+            c.threadId.toLowerCase().includes(search) ||
+            c.userId.toLowerCase().includes(search)
+        );
+    }
+
+    // Apply time filter
+    const now = Date.now();
+    if (filter === 'active') {
+        filtered = filtered.filter(c => (now - new Date(c.lastActivity || c.createdAt)) < 86400000);
+    } else if (filter === 'week') {
+        filtered = filtered.filter(c => (now - new Date(c.createdAt)) < 604800000);
+    } else if (filter === 'month') {
+        filtered = filtered.filter(c => (now - new Date(c.createdAt)) < 2592000000);
+    }
+
+    renderConversations(filtered);
+}
+
+function updateConversationStats(conversations) {
+    // Update statistics
+    const totalThreads = document.getElementById('totalThreads');
+    const activeToday = document.getElementById('activeToday');
+    const avgMessages = document.getElementById('avgMessages');
+    const totalExtracted = document.getElementById('totalExtracted');
+
+    if (totalThreads) totalThreads.textContent = conversations.length;
+
+    if (activeToday) {
+        const today = conversations.filter(c => {
+            const lastActive = new Date(c.lastActivity || c.createdAt);
+            return (Date.now() - lastActive) < 86400000;
+        });
+        activeToday.textContent = today.length;
+    }
+
+    if (avgMessages) {
+        const totalMessages = conversations.reduce((sum, c) => sum + (c.messageCount || 0), 0);
+        const avg = conversations.length > 0 ? Math.round(totalMessages / conversations.length) : 0;
+        avgMessages.textContent = avg;
+    }
+
+    if (totalExtracted) {
+        // This would come from the backend
+        totalExtracted.textContent = '0';
+    }
+}
+
+async function viewConversation(threadId) {
+    const modal = document.getElementById('conversationModal');
+    if (!modal) return;
+
+    // Set thread info
+    document.getElementById('modalThreadId').textContent = threadId;
+
+    const conversation = currentConversations.find(c => c.threadId === threadId);
+    if (conversation) {
+        document.getElementById('modalUserId').textContent = conversation.userId;
+        document.getElementById('modalStartTime').textContent = new Date(conversation.createdAt).toLocaleString();
+        document.getElementById('modalMessageCount').textContent = conversation.messageCount || 0;
+    }
+
+    // Load messages
+    const messagesDiv = document.getElementById('conversationMessages');
+    messagesDiv.innerHTML = '<div class="loading-state">Loading messages...</div>';
+
+    try {
+        // Use the existing GetMessages function
+        const url = `${API_BASE}/api/conversation/${threadId}/messages?code=${API_KEY}`;
+        const response = await fetch(url);
+
+        if (response.ok) {
+            const data = await response.json();
+            renderMessages(data.messages);
+        } else {
+            messagesDiv.innerHTML = '<div class="empty-state">Could not load messages</div>';
+        }
+    } catch (error) {
+        console.error('Error loading messages:', error);
+        messagesDiv.innerHTML = '<div class="empty-state">Failed to load messages</div>';
+    }
+
+    modal.classList.add('active');
+}
+
+function renderMessages(messages) {
+    const messagesDiv = document.getElementById('conversationMessages');
+    if (!messages || messages.length === 0) {
+        messagesDiv.innerHTML = '<div class="empty-state">No messages found</div>';
+        return;
+    }
+
+    messagesDiv.innerHTML = messages.map(msg => `
+        <div class="message-item ${msg.role}">
+            <div class="message-header">
+                <strong>${msg.role === 'assistant' ? 'Bot' : 'User'}</strong>
+                <span>${new Date(msg.created).toLocaleString()}</span>
+            </div>
+            <div class="message-content">${escapeHtml(msg.content)}</div>
+        </div>
+    `).join('');
+}
+
+function closeConversationModal() {
+    const modal = document.getElementById('conversationModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+// Make closeConversationModal globally available
+window.closeConversationModal = closeConversationModal;
+window.viewConversation = viewConversation;
 
 // ============================================================================
 // Discovery Contexts
@@ -474,9 +698,10 @@ async function loadKnowledge() {
     grid.innerHTML = '<div class="loading-state">Loading knowledge items...</div>';
 
     try {
+        // Use the management API endpoint for full knowledge items
         const url = API_KEY
-            ? `${API_BASE}/api/knowledge?code=${API_KEY}`
-            : `${API_BASE}/api/knowledge`;
+            ? `${API_BASE}/api/manage/knowledge?code=${API_KEY}`
+            : `${API_BASE}/api/manage/knowledge`;
 
         const response = await fetch(url);
 
@@ -484,7 +709,8 @@ async function loadKnowledge() {
             throw new Error('Failed to load knowledge');
         }
 
-        currentKnowledge = await response.json();
+        const data = await response.json();
+        currentKnowledge = data.items || [];
         renderKnowledge(currentKnowledge);
 
         // Populate context filter
@@ -494,7 +720,7 @@ async function loadKnowledge() {
             contexts.map(c => `<option value="${c}">${c}</option>`).join('');
     } catch (error) {
         console.error('Error loading knowledge:', error);
-        grid.innerHTML = '<div class="empty-state">No knowledge items found.</div>';
+        grid.innerHTML = '<div class="empty-state">Failed to load knowledge items. Will be available after deployment.</div>';
     }
 }
 
@@ -510,13 +736,24 @@ function renderKnowledge(items) {
         <div class="card">
             <div class="card-header">
                 <span class="badge badge-active">${item.category || 'Uncategorized'}</span>
+                ${item.sourceThreadId ? `
+                    <button class="card-action-btn" onclick="viewConversation('${item.sourceThreadId}')" title="View source conversation">
+                        💬
+                    </button>
+                ` : ''}
             </div>
             <div class="card-body">
-                <p>${escapeHtml(item.content.substring(0, 150))}${item.content.length > 150 ? '...' : ''}</p>
+                <p>${escapeHtml((item.content || '').substring(0, 150))}${(item.content || '').length > 150 ? '...' : ''}</p>
+                ${item.sourceUserId ? `
+                    <small style="color: #999; display: block; margin-top: 8px;">
+                        Source: ${escapeHtml(item.sourceUserRole || item.sourceUserId)}
+                        ${item.extractionTimestamp ? ` • ${new Date(item.extractionTimestamp).toLocaleDateString()}` : ''}
+                    </small>
+                ` : ''}
             </div>
             <div class="card-footer">
                 <span>Confidence: ${Math.round((item.confidence || 0) * 100)}%</span>
-                <span>${new Date(item.extractionTimestamp).toLocaleDateString()}</span>
+                ${item.verified ? '<span style="color: #4caf50;">✓ Verified</span>' : ''}
             </div>
         </div>
     `).join('');
