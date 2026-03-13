@@ -359,7 +359,8 @@
         const STORAGE_PREFIX = 'discovery-bot-';
 
         const CONFIG = {
-            apiBase: window.location.origin,
+            apiBase: window.API_ENDPOINT || 'https://discdev-func-3xr5ve.azurewebsites.net',
+            apiKey: window.API_KEY || 'VxOdrb12vGGjbYLIt7CQ7Jc6BsbyavW-dZejQhvVqo9dAzFumvoeQw==', // Conversation function key
             // Restore userId or generate a new stable one
             userId: localStorage.getItem(STORAGE_PREFIX + 'userId')
                     || 'web-user-' + crypto.randomUUID().slice(0, 12),
@@ -408,8 +409,12 @@
             container.appendChild(loader);
 
             try {
+                const baseUrl = CONFIG.apiKey
+                    ? `${CONFIG.apiBase}/api/conversation/${tid}/messages?code=${CONFIG.apiKey}`
+                    : `${CONFIG.apiBase}/api/conversation/${tid}/messages`;
+
                 const res = await fetch(
-                    `${CONFIG.apiBase}/api/conversation/${tid}/messages?userId=${encodeURIComponent(CONFIG.userId)}`
+                    `${baseUrl}&userId=${encodeURIComponent(CONFIG.userId)}`
                 );
 
                 if (!res.ok) {
@@ -474,7 +479,11 @@
             showTyping(true);
 
             try {
-                const response = await fetch(`${CONFIG.apiBase}/api/conversation`, {
+                const url = CONFIG.apiKey
+                    ? `${CONFIG.apiBase}/api/conversation?code=${CONFIG.apiKey}`
+                    : `${CONFIG.apiBase}/api/conversation`;
+
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -487,13 +496,15 @@
 
                 const data = await response.json();
 
-                // ── Persist threadId ──
-                threadId = data.threadId;
+                // ── Persist threadId ── (handle both cases for backward compatibility)
+                threadId = data.ThreadId || data.threadId;
                 localStorage.setItem(STORAGE_PREFIX + 'threadId', threadId);
                 updateSessionIndicator();
 
                 showTyping(false);
-                appendMessage('bot', data.response, data.extractedKnowledgeIds);
+                const responseText = data.Response || data.response || JSON.stringify(data);
+                const knowledgeIds = data.ExtractedKnowledgeIds || data.extractedKnowledgeIds;
+                appendMessage('bot', responseText, knowledgeIds);
 
             } catch (err) {
                 showTyping(false);
@@ -516,7 +527,11 @@
             formData.append('userId', CONFIG.userId);
 
             try {
-                const response = await fetch(`${CONFIG.apiBase}/api/upload`, {
+                const url = CONFIG.apiKey
+                    ? `${CONFIG.apiBase}/api/upload?code=${CONFIG.apiKey}`
+                    : `${CONFIG.apiBase}/api/upload`;
+
+                const response = await fetch(url, {
                     method: 'POST',
                     body: formData,
                 });
@@ -528,9 +543,9 @@
                         'I can guide you through it conversationally \u2014 shall we begin?');
                 }
 
-                // If the upload created/confirmed a threadId, persist it
-                if (result.threadId) {
-                    threadId = result.threadId;
+                // If the upload created/confirmed a threadId, persist it (handle both cases)
+                if (result.ThreadId || result.threadId) {
+                    threadId = result.ThreadId || result.threadId;
                     localStorage.setItem(STORAGE_PREFIX + 'threadId', threadId);
                     updateSessionIndicator();
                 }
