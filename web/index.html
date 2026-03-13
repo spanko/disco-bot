@@ -3,38 +3,647 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discovery Agent</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Discovery Bot</title>
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --border: #e2e6ea;
+            --text: #1a1a2e;
+            --text-light: #6c757d;
+            --accent: #0078d4;
+            --accent-hover: #106ebe;
+            --user-bubble: #0078d4;
+            --user-text: #ffffff;
+            --bot-bubble: #f0f2f5;
+            --bot-text: #1a1a2e;
+            --danger: #d13438;
+            --success: #107c10;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ============================================================= */
+        /* Header                                                         */
+        /* ============================================================= */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .header .icon {
+            font-size: 28px;
+            background: linear-gradient(135deg, #0078d4 0%, #50e6ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+        .header .subtitle {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .session-indicator {
+            font-size: 11px;
+            color: var(--text-light);
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        .session-indicator.active {
+            color: var(--success);
+            border-color: #c8e6c9;
+            background: #e8f5e9;
+        }
+        .btn-new-chat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent);
+            background: transparent;
+            border: 1px solid var(--accent);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-new-chat:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* ============================================================= */
+        /* Chat area                                                      */
+        /* ============================================================= */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+        }
+
+        /* Loading overlay shown while history is being fetched */
+        .history-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 40px 20px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        .history-loading .spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Messages */
+        .message {
+            display: flex;
+            gap: 10px;
+            max-width: 80%;
+            animation: fadeIn 0.25s ease;
+        }
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        .message.bot {
+            align-self: flex-start;
+        }
+        .message.system {
+            align-self: center;
+            max-width: 90%;
+        }
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+            background: var(--bg);
+        }
+        .bubble {
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        .user .bubble {
+            background: var(--user-bubble);
+            color: var(--user-text);
+            border-bottom-right-radius: 4px;
+        }
+        .bot .bubble {
+            background: var(--bot-bubble);
+            color: var(--bot-text);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+        }
+        .system .bubble {
+            background: transparent;
+            color: var(--text-light);
+            font-size: 12px;
+            text-align: center;
+            padding: 6px 12px;
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            gap: 10px;
+            padding: 0 20px 10px;
+        }
+        .typing-indicator.visible { display: flex; }
+        .dots span {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            background: var(--text-light);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        .dots span:nth-child(2) { animation-delay: 0.16s; }
+        .dots span:nth-child(3) { animation-delay: 0.32s; }
+
+        /* Knowledge badge */
+        .knowledge-badge {
+            display: inline-block;
+            background: #e8f4e8;
+            color: var(--success);
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 6px;
+        }
+
+        /* ============================================================= */
+        /* Input area                                                     */
+        /* ============================================================= */
+        .input-area {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 12px 20px 14px;
+            flex-shrink: 0;
+        }
+        .file-preview {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--accent);
+            padding: 6px 10px;
+            margin-bottom: 8px;
+            background: #e8f0fe;
+            border-radius: 8px;
+        }
+        .file-preview.visible { display: flex; }
+        .file-preview .remove {
+            cursor: pointer;
+            color: var(--text-light);
+            margin-left: auto;
+        }
+        .input-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        .btn {
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.15s ease;
+        }
+        .btn-upload {
+            padding: 8px 10px;
+            background: transparent;
+            font-size: 18px;
+        }
+        .btn-primary {
+            padding: 8px 18px;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 500;
+        }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-primary:disabled { opacity: 0.5; cursor: default; }
+        .file-input { display: none; }
+        textarea {
+            flex: 1;
+            resize: none;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.4;
+            max-height: 120px;
+            outline: none;
+            transition: border 0.15s ease;
+        }
+        textarea:focus { border-color: var(--accent); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40%            { transform: translateY(-6px); }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Discovery Agent</h1>
-            <p>AI-powered knowledge discovery and conversation</p>
-        </div>
 
-        <div class="chat-area" id="chatArea">
-            <div class="message system">
-                <div class="message-content">
-                    <strong>Welcome to Discovery Agent</strong><br>
-                    Start a conversation to discover, understand, and document knowledge.<br>
-                    Your session ID: <strong id="userIdDisplay"></strong>
-                </div>
-            </div>
+    <!-- ============================================================= -->
+    <!-- Header with session indicator + new chat button                -->
+    <!-- ============================================================= -->
+    <div class="header">
+        <span class="icon">&#x1F50D;</span>
+        <div>
+            <h1>Discovery Bot</h1>
+            <div class="subtitle">Conversational Discovery Assistant</div>
         </div>
-
-        <div class="input-area">
-            <div class="loading" id="loading">Agent is thinking...</div>
-            <div class="upload-status" id="uploadStatus"></div>
-            <div class="input-wrapper">
-                <input type="text" id="messageInput" placeholder="Type your message..." autocomplete="off">
-                <input type="file" id="fileInput" style="display: none;" accept=".pdf,.docx,.xlsx,.txt,.csv,.png,.jpg,.jpeg">
-                <button id="attachButton" title="Attach file">📎</button>
-                <button id="sendButton">Send</button>
-            </div>
+        <div class="header-actions">
+            <span class="session-indicator" id="sessionIndicator">No session</span>
+            <button class="btn-new-chat" id="newChatBtn" onclick="startNewConversation()" title="Start a fresh conversation">
+                &#x2795; New Chat
+            </button>
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <!-- ============================================================= -->
+    <!-- Chat container                                                 -->
+    <!-- ============================================================= -->
+    <div class="chat-container" id="chatContainer">
+        <!-- Messages render here -->
+    </div>
+
+    <div class="typing-indicator" id="typingIndicator">
+        <div class="avatar" style="background:#e8e8e8;">&#x1F916;</div>
+        <div class="bubble" style="background:var(--bot-bubble);border:1px solid var(--border);padding:12px 16px;border-radius:12px;">
+            <div class="dots"><span></span> <span></span> <span></span></div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- Input area                                                     -->
+    <!-- ============================================================= -->
+    <div class="input-area">
+        <div class="file-preview" id="filePreview">
+            <span>&#x1F4CE;</span>
+            <span id="fileName"></span>
+            <span class="remove" onclick="clearFile()">&#x2715;</span>
+        </div>
+        <div class="input-row">
+            <button class="btn btn-upload"
+                    onclick="document.getElementById('fileInput').click()"
+                    title="Upload file">&#x1F4CE;</button>
+            <input type="file" class="file-input" id="fileInput"
+                   accept=".pdf,.docx,.xlsx,.txt,.csv,.png,.jpg,.jpeg"
+                   onchange="handleFileSelect(this)">
+            <textarea id="messageInput" placeholder="Type your message..." rows="1"
+                      onkeydown="handleKeyDown(event)" oninput="autoResize(this)"></textarea>
+            <button class="btn btn-primary" id="sendBtn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // =================================================================
+        // Configuration
+        // =================================================================
+        const STORAGE_PREFIX = 'discovery-bot-';
+
+        const CONFIG = {
+            apiBase: window.location.origin,
+            // Restore userId or generate a new stable one
+            userId: localStorage.getItem(STORAGE_PREFIX + 'userId')
+                    || 'web-user-' + crypto.randomUUID().slice(0, 12),
+            contextId: null,
+        };
+
+        // Persist userId immediately so it survives refreshes
+        localStorage.setItem(STORAGE_PREFIX + 'userId', CONFIG.userId);
+
+        // Parse optional context from URL: ?context=my-context-id
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('context')) CONFIG.contextId = urlParams.get('context');
+
+        // =================================================================
+        // Session State (persisted to localStorage)
+        // =================================================================
+        let threadId  = localStorage.getItem(STORAGE_PREFIX + 'threadId') || null;
+        let pendingFile  = null;
+        let isProcessing = false;
+
+        updateSessionIndicator();
+
+        // =================================================================
+        // Page Load — restore conversation history if we have a thread
+        // =================================================================
+        (async function init() {
+            if (threadId) {
+                await loadConversationHistory(threadId);
+            } else {
+                appendSystemMessage('Start a new conversation by typing a message below.');
+            }
+            document.getElementById('messageInput').focus();
+        })();
+
+        // =================================================================
+        // Load history from backend
+        // =================================================================
+        async function loadConversationHistory(tid) {
+            const container = document.getElementById('chatContainer');
+
+            // Show loading state
+            container.innerHTML = '';
+            const loader = document.createElement('div');
+            loader.className = 'history-loading';
+            loader.innerHTML = '<div class="spinner"></div><span>Restoring conversation&hellip;</span>';
+            container.appendChild(loader);
+
+            try {
+                const res = await fetch(
+                    `${CONFIG.apiBase}/api/conversation/${tid}/messages?userId=${encodeURIComponent(CONFIG.userId)}`
+                );
+
+                if (!res.ok) {
+                    // Thread may have been deleted or expired — start fresh
+                    console.warn('Could not load thread', tid, res.status);
+                    clearSession();
+                    container.innerHTML = '';
+                    appendSystemMessage('Previous session could not be restored. Starting fresh.');
+                    return;
+                }
+
+                const data = await res.json();
+                container.innerHTML = ''; // remove loader
+
+                if (!data.messages || data.messages.length === 0) {
+                    appendSystemMessage('Session restored — no prior messages found.');
+                    return;
+                }
+
+                // Render each historical message
+                // Expected shape: { messages: [{ role: 'user'|'assistant', content: '...' }, ...] }
+                for (const msg of data.messages) {
+                    const role = msg.role === 'assistant' ? 'bot' : 'user';
+                    appendMessage(role, msg.content, null, /* animate */ false);
+                }
+
+                appendSystemMessage('Session restored. You can continue where you left off.');
+                container.scrollTop = container.scrollHeight;
+
+            } catch (err) {
+                console.error('Failed to load history:', err);
+                container.innerHTML = '';
+                appendSystemMessage('Could not connect to server. You can still start chatting.');
+            }
+        }
+
+        // =================================================================
+        // Chat — send message
+        // =================================================================
+        async function sendMessage() {
+            const input   = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message && !pendingFile) return;
+            if (isProcessing) return;
+
+            isProcessing = true;
+            document.getElementById('sendBtn').disabled = true;
+
+            if (message) {
+                appendMessage('user', message);
+                input.value = '';
+                autoResize(input);
+            }
+
+            // Upload file first if present
+            if (pendingFile) {
+                appendMessage('user', '\u{1F4CE} Uploaded: ' + pendingFile.name);
+                await uploadFile(pendingFile);
+                clearFile();
+            }
+
+            showTyping(true);
+
+            try {
+                const response = await fetch(`${CONFIG.apiBase}/api/conversation`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId:    CONFIG.userId,
+                        message:   message || 'I just uploaded a file. Please review it.',
+                        threadId:  threadId,
+                        contextId: CONFIG.contextId,
+                    }),
+                });
+
+                const data = await response.json();
+
+                // ── Persist threadId ──
+                threadId = data.threadId;
+                localStorage.setItem(STORAGE_PREFIX + 'threadId', threadId);
+                updateSessionIndicator();
+
+                showTyping(false);
+                appendMessage('bot', data.response, data.extractedKnowledgeIds);
+
+            } catch (err) {
+                showTyping(false);
+                appendMessage('bot', 'Sorry, something went wrong. Please try again.');
+                console.error('Chat error:', err);
+            }
+
+            isProcessing = false;
+            document.getElementById('sendBtn').disabled = false;
+            input.focus();
+        }
+
+        // =================================================================
+        // File upload
+        // =================================================================
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('threadId', threadId || '');
+            formData.append('userId', CONFIG.userId);
+
+            try {
+                const response = await fetch(`${CONFIG.apiBase}/api/upload`, {
+                    method: 'POST',
+                    body: formData,
+                });
+                const result = await response.json();
+
+                if (result.isQuestionnaire) {
+                    appendMessage('bot',
+                        'I\'ve detected that "' + result.fileName + '" is a questionnaire. ' +
+                        'I can guide you through it conversationally \u2014 shall we begin?');
+                }
+
+                // If the upload created/confirmed a threadId, persist it
+                if (result.threadId) {
+                    threadId = result.threadId;
+                    localStorage.setItem(STORAGE_PREFIX + 'threadId', threadId);
+                    updateSessionIndicator();
+                }
+
+                return result;
+            } catch (err) {
+                console.error('Upload error:', err);
+            }
+        }
+
+        // =================================================================
+        // New conversation
+        // =================================================================
+        function startNewConversation() {
+            if (threadId && !confirm('Start a new conversation? Your previous session is saved and can be accessed from the backend.')) {
+                return;
+            }
+            clearSession();
+            document.getElementById('chatContainer').innerHTML = '';
+            appendSystemMessage('New conversation started.');
+            document.getElementById('messageInput').focus();
+        }
+
+        function clearSession() {
+            threadId = null;
+            localStorage.removeItem(STORAGE_PREFIX + 'threadId');
+            updateSessionIndicator();
+        }
+
+        // =================================================================
+        // Session indicator
+        // =================================================================
+        function updateSessionIndicator() {
+            const el = document.getElementById('sessionIndicator');
+            if (threadId) {
+                const shortId = threadId.slice(0, 8);
+                el.textContent = '\u{2705} Session ' + shortId;
+                el.classList.add('active');
+            } else {
+                el.textContent = 'No session';
+                el.classList.remove('active');
+            }
+        }
+
+        // =================================================================
+        // UI Helpers
+        // =================================================================
+        function appendMessage(role, text, knowledgeIds, animate = true) {
+            const container = document.getElementById('chatContainer');
+            const msg = document.createElement('div');
+            msg.className = 'message ' + role;
+            if (!animate) msg.style.animation = 'none';
+
+            const avatar = role === 'user' ? '\u{1F464}' : '\u{1F916}';
+            let badgeHtml = '';
+            if (knowledgeIds && knowledgeIds.length > 0) {
+                badgeHtml = '<div class="knowledge-badge">\u2713 ' + knowledgeIds.length + ' insight(s) captured</div>';
+            }
+
+            msg.innerHTML =
+                '<div class="avatar">' + avatar + '</div>' +
+                '<div>' +
+                '  <div class="bubble">' + escapeHtml(text) + '</div>' +
+                   badgeHtml +
+                '</div>';
+
+            container.appendChild(msg);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function appendSystemMessage(text) {
+            const container = document.getElementById('chatContainer');
+            const msg = document.createElement('div');
+            msg.className = 'message system';
+            msg.innerHTML = '<div class="bubble">' + escapeHtml(text) + '</div>';
+            container.appendChild(msg);
+        }
+
+        function showTyping(show) {
+            document.getElementById('typingIndicator').classList.toggle('visible', show);
+        }
+
+        function handleFileSelect(input) {
+            if (input.files.length > 0) {
+                pendingFile = input.files[0];
+                document.getElementById('fileName').textContent = pendingFile.name;
+                document.getElementById('filePreview').classList.add('visible');
+            }
+        }
+
+        function clearFile() {
+            pendingFile = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('filePreview').classList.remove('visible');
+        }
+
+        function handleKeyDown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
 </body>
 </html>
