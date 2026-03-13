@@ -69,9 +69,10 @@ async function sendMessage() {
         addMessage(data.Response || data.response || JSON.stringify(data), 'agent');
 
         // If knowledge was extracted, show a subtle notification
-        if (data.ExtractedKnowledgeIds || data.extractedKnowledgeIds && data.ExtractedKnowledgeIds || data.extractedKnowledgeIds.length > 0) {
+        const knowledgeIds = data.ExtractedKnowledgeIds || data.extractedKnowledgeIds;
+        if (knowledgeIds && knowledgeIds.length > 0) {
             addMessage(
-                `✓ Captured ${data.ExtractedKnowledgeIds || data.extractedKnowledgeIds.length} knowledge item(s)`,
+                `✓ Captured ${knowledgeIds.length} knowledge item(s)`,
                 'system'
             );
         }
